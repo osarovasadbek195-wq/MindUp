@@ -27,36 +27,46 @@ const TaskSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'mistakeCount': PropertySchema(
+    r'lastReviewedAt': PropertySchema(
       id: 2,
+      name: r'lastReviewedAt',
+      type: IsarType.dateTime,
+    ),
+    r'mistakeCount': PropertySchema(
+      id: 3,
       name: r'mistakeCount',
       type: IsarType.long,
     ),
     r'nextReviewDate': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'nextReviewDate',
       type: IsarType.dateTime,
     ),
     r'reviewCount': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'reviewCount',
       type: IsarType.long,
     ),
     r'stage': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'stage',
       type: IsarType.byte,
       enumMap: _TaskstageEnumValueMap,
     ),
     r'subject': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'subject',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'title',
       type: IsarType.string,
+    ),
+    r'webId': PropertySchema(
+      id: 9,
+      name: r'webId',
+      type: IsarType.long,
     )
   },
   estimateSize: _taskEstimateSize,
@@ -151,12 +161,14 @@ void _taskSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeString(offsets[1], object.description);
-  writer.writeLong(offsets[2], object.mistakeCount);
-  writer.writeDateTime(offsets[3], object.nextReviewDate);
-  writer.writeLong(offsets[4], object.reviewCount);
-  writer.writeByte(offsets[5], object.stage.index);
-  writer.writeString(offsets[6], object.subject);
-  writer.writeString(offsets[7], object.title);
+  writer.writeDateTime(offsets[2], object.lastReviewedAt);
+  writer.writeLong(offsets[3], object.mistakeCount);
+  writer.writeDateTime(offsets[4], object.nextReviewDate);
+  writer.writeLong(offsets[5], object.reviewCount);
+  writer.writeByte(offsets[6], object.stage.index);
+  writer.writeString(offsets[7], object.subject);
+  writer.writeString(offsets[8], object.title);
+  writer.writeLong(offsets[9], object.webId);
 }
 
 Task _taskDeserialize(
@@ -169,13 +181,14 @@ Task _taskDeserialize(
   object.createdAt = reader.readDateTime(offsets[0]);
   object.description = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.mistakeCount = reader.readLong(offsets[2]);
-  object.nextReviewDate = reader.readDateTime(offsets[3]);
-  object.reviewCount = reader.readLong(offsets[4]);
-  object.stage = _TaskstageValueEnumMap[reader.readByteOrNull(offsets[5])] ??
+  object.lastReviewedAt = reader.readDateTimeOrNull(offsets[2]);
+  object.mistakeCount = reader.readLong(offsets[3]);
+  object.nextReviewDate = reader.readDateTime(offsets[4]);
+  object.reviewCount = reader.readLong(offsets[5]);
+  object.stage = _TaskstageValueEnumMap[reader.readByteOrNull(offsets[6])] ??
       TaskStage.learning;
-  object.subject = reader.readString(offsets[6]);
-  object.title = reader.readString(offsets[7]);
+  object.subject = reader.readString(offsets[7]);
+  object.title = reader.readString(offsets[8]);
   return object;
 }
 
@@ -191,18 +204,22 @@ P _taskDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
-    case 4:
       return (reader.readLong(offset)) as P;
+    case 4:
+      return (reader.readDateTime(offset)) as P;
     case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (_TaskstageValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskStage.learning) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -946,6 +963,75 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterFilterCondition> lastReviewedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastReviewedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> lastReviewedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastReviewedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> lastReviewedAtEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastReviewedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> lastReviewedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastReviewedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> lastReviewedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastReviewedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> lastReviewedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastReviewedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterFilterCondition> mistakeCountEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1413,6 +1499,58 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> webIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'webId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> webIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'webId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> webIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'webId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> webIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'webId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension TaskQueryObject on QueryBuilder<Task, Task, QFilterCondition> {}
@@ -1441,6 +1579,18 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
   QueryBuilder<Task, Task, QAfterSortBy> sortByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByLastReviewedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastReviewedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByLastReviewedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastReviewedAt', Sort.desc);
     });
   }
 
@@ -1515,6 +1665,18 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
       return query.addSortBy(r'title', Sort.desc);
     });
   }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByWebId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'webId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByWebIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'webId', Sort.desc);
+    });
+  }
 }
 
 extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
@@ -1551,6 +1713,18 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
   QueryBuilder<Task, Task, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByLastReviewedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastReviewedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByLastReviewedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastReviewedAt', Sort.desc);
     });
   }
 
@@ -1625,6 +1799,18 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
       return query.addSortBy(r'title', Sort.desc);
     });
   }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByWebId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'webId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByWebIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'webId', Sort.desc);
+    });
+  }
 }
 
 extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
@@ -1638,6 +1824,12 @@ extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Task, Task, QDistinct> distinctByLastReviewedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastReviewedAt');
     });
   }
 
@@ -1678,6 +1870,12 @@ extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
       return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<Task, Task, QDistinct> distinctByWebId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'webId');
+    });
+  }
 }
 
 extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
@@ -1696,6 +1894,12 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
   QueryBuilder<Task, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<Task, DateTime?, QQueryOperations> lastReviewedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastReviewedAt');
     });
   }
 
@@ -1732,6 +1936,12 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
   QueryBuilder<Task, String, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'title');
+    });
+  }
+
+  QueryBuilder<Task, int, QQueryOperations> webIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'webId');
     });
   }
 }

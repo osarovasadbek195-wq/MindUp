@@ -18,14 +18,17 @@ class Task {
   late DateTime nextReviewDate; // Keyingi takrorlash vaqti
 
   @Index()
-  late String subject; // Mavzu (masalan: "English", "Math")
+  late String subject; // Fan nomi
 
+  int reviewCount = 0; // Takrorlashlar soni
+  int mistakeCount = 0; // Xatolar soni
   @enumerated
-  TaskStage stage = TaskStage.learning; // Hozirgi bosqich
-
-  // Statistikalar
-  int reviewCount = 0;
-  int mistakeCount = 0;
+  TaskStage stage = TaskStage.learning; // Bosqichi
+  
+  DateTime? lastReviewedAt; // Oxirgi ko'rib chiqilgan vaqti
+  
+  // Web uchun kichik ID
+  int get webId => hashCode.abs();
 }
 
 enum TaskStage {
