@@ -340,7 +340,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(task.subject),
-            trailing: const Icon(Icons.play_arrow_rounded, color: Colors.deepPurple),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.check_circle, color: Colors.green),
+                  onPressed: () => _completeTask(task, true),
+                  tooltip: 'Completed Successfully',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.cancel, color: Colors.red),
+                  onPressed: () => _completeTask(task, false),
+                  tooltip: 'Need More Practice',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.play_arrow_rounded, color: Colors.deepPurple),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => StudyScreen(
+                          task: task,
+                          onResult: (isSuccess) {
+                            context.read<HomeBloc>().add(CompleteTask(task, isSuccess));
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  tooltip: 'Study Now',
+                ),
+              ],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -359,7 +390,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
       },
     );
   }
-  
+
+  void _completeTask(Task task, bool isSuccess) {
+    context.read<HomeBloc>().add(CompleteTask(task, isSuccess));
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isSuccess ? '✅ Task completed!' : '📚 Need more practice'),
+        backgroundColor: isSuccess ? Colors.green : Colors.orange,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   Color _getStageColor(TaskStage stage) {
     switch (stage) {
       case TaskStage.learning: return Colors.blue;
