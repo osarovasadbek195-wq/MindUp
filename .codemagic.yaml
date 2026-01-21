@@ -11,14 +11,18 @@ workflows:
       - name: Set up environment variables
         script: |
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
+          echo "Environment variables set"
       - name: Install dependencies
         script: |
           flutter pub get
+      - name: Clean build
+        script: |
+          flutter clean
       - name: Generate code
         script: |
           dart run build_runner build --delete-conflicting-outputs
       - name: Build APK
         script: |
-          flutter build apk --release
+          flutter build apk --release --no-shrink
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
