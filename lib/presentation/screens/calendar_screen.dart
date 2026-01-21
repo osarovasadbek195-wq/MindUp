@@ -54,14 +54,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
             onPressed: () async {
               final isarService = context.read<IsarService>();
               final allTasks = await isarService.getAllTasks();
-              if (mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AnalyticsScreen(allTasks: allTasks),
-                  ),
-                );
-              }
+              if (!mounted) return;
+              
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AnalyticsScreen(allTasks: allTasks),
+                ),
+              );
             },
           ),
           IconButton(
@@ -81,7 +81,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFF0F4FF), Color(0xFFE8F1F8)], // Soft HyperOS Gradient
+            colors: [const Color(0xFFF0F4FF), const Color(0xFFE8F1F8)], // Soft HyperOS Gradient
           ),
         ),
         child: BlocConsumer<HomeBloc, HomeState>(
@@ -105,11 +105,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   Container(
                     margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                          BoxShadow(
-                           color: Colors.black.withOpacity(0.05),
+                           color: Colors.black.withValues(alpha: 0.05),
                            blurRadius: 20,
                            offset: const Offset(0, 10),
                          )
@@ -148,7 +148,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                       calendarStyle: CalendarStyle(
                         todayDecoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
                         selectedDecoration: BoxDecoration(
@@ -156,7 +156,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             )
@@ -272,7 +272,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(

@@ -52,11 +52,11 @@ class AnalyticsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                          BoxShadow(
-                           color: Colors.black.withOpacity(0.03),
+                           color: Colors.black.withValues(alpha: 0.03),
                            blurRadius: 20,
                            offset: const Offset(0, 10),
                          )
@@ -145,7 +145,7 @@ class AnalyticsScreen extends StatelessWidget {
       child: Container(
         height: 120,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.6),
+          color: Colors.white.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white, width: 2),
         ),
@@ -155,7 +155,7 @@ class AnalyticsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 20),

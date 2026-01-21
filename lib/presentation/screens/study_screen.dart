@@ -44,12 +44,12 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(32),
-                      border: Border.all(color: Colors.white.withOpacity(0.8), width: 1.5),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 30,
                           offset: const Offset(0, 15),
                         ),
@@ -89,7 +89,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
                               gradient: LinearGradient(
                                 colors: [
                                   Colors.transparent, 
-                                  Colors.grey.withOpacity(0.5), 
+                                  Colors.grey.withValues(alpha: 0.5), 
                                   Colors.transparent
                                 ],
                               ),
@@ -215,7 +215,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
-            color: bgColor.withOpacity(0.8),
+            color: bgColor.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
