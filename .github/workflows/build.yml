@@ -24,6 +24,10 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.38.7'
+        channel: 'stable'
+        
+    - name: Clean
+      run: flutter clean
         
     - name: Install dependencies
       run: flutter pub get
@@ -31,8 +35,21 @@ jobs:
     - name: Generate files
       run: flutter pub run build_runner build --delete-conflicting-outputs
       
+    - name: Fix Android Gradle Plugin
+      run: |
+        cd android
+        echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
+        echo "android.useAndroidX=true" >> gradle.properties
+        echo "android.enableJetifier=true" >> gradle.properties
+        chmod +x gradlew
+        
+    - name: Update Gradle Wrapper
+      run: |
+        cd android
+        ./gradlew wrapper --gradle-version=8.5 --distribution-type=all
+        
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build apk --release --no-tree-shake-icons
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
