@@ -1,3 +1,5 @@
+apply(from = "namespace-fix.gradle")
+
 allprojects {
     repositories {
         google()
@@ -18,8 +20,6 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(":app")
 }
-
-apply(from = "namespace-fix.gradle")
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
