@@ -101,6 +101,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             return SafeArea(
               child: Column(
                 children: [
+                  _buildGamificationHeader(),
                   Container(
                     margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
