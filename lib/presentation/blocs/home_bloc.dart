@@ -92,7 +92,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
                if (openAIService != null) {
                  newTasks = await openAIService!.generateTasks(event.prompt, event.subject);
                } else {
-                 throw e;
+                 rethrow;
                }
              }
           } else if (openAIService != null) {

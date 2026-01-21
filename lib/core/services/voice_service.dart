@@ -32,8 +32,10 @@ class VoiceService {
         }
       },
       localeId: 'en_US', // Hozircha ingliz tili, keyin o'zbek tiliga moslash mumkin
-      cancelOnError: true,
-      partialResults: false,
+      listenOptions: SpeechListenOptions(
+        cancelOnError: true,
+        partialResults: false,
+      ),
     );
   }
 

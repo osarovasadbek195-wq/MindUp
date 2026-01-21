@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
 import 'data/services/isar_service.dart';
 import 'data/services/openai_service.dart';
@@ -71,16 +70,16 @@ class MindUpApp extends StatelessWidget {
             // HyperOS Style Card
             cardTheme: CardThemeData(
               elevation: 0,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24), // More rounded
-                side: BorderSide(color: Colors.white.withOpacity(0.5), width: 1),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.5), width: 1),
               ),
             ),
             // HyperOS Style Dialog
             dialogTheme: DialogThemeData(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-              backgroundColor: Colors.white.withOpacity(0.95),
+              backgroundColor: Colors.white.withValues(alpha: 0.95),
               elevation: 10,
             ),
             // HyperOS Style Buttons

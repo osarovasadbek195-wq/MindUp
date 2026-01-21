@@ -70,6 +70,7 @@ class _AISearchScreenState extends State<AISearchScreen>
       _animationController.forward();
     } catch (e) {
       AppLogger.error('Qidiruv xatosi', error: e);
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -90,6 +91,7 @@ class _AISearchScreenState extends State<AISearchScreen>
 
     try {
       final answer = await _aiSearchService.getDetailedAnswer(query);
+      if (!mounted) return;
       setState(() {
         _detailedAnswer = answer;
         _isLoading = false;

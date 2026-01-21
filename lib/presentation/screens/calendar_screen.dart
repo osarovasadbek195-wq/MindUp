@@ -81,7 +81,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [const Color(0xFFF0F4FF), const Color(0xFFE8F1F8)], // Soft HyperOS Gradient
+            colors: [Color(0xFFF0F4FF), Color(0xFFE8F1F8)], // Soft HyperOS Gradient
           ),
         ),
         child: BlocConsumer<HomeBloc, HomeState>(
@@ -276,7 +276,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               )
@@ -286,9 +286,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(Icons.local_fire_department, '${profile.currentStreak}', 'Streak', Colors.orange),
-              Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
+              Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.3)),
               _buildStatItem(Icons.star, '${profile.totalXP} XP', 'Lvl ${profile.level}', Colors.amber),
-              Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
+              Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.3)),
               _buildStatItem(Icons.next_plan, '${profile.xpForNextLevel}', 'Next Lvl', Colors.blue),
             ],
           ),

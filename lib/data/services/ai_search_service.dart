@@ -31,7 +31,7 @@ class AISearchService {
   AISearchService({required this.apiKey});
 
   Future<List<AISearchResult>> search(String query) async {
-    final systemPrompt = '''
+    const systemPrompt = '''
       Siz aqlli qidiruv tizimisiz. Foydalanuvchining so'roviga asoslanib, 
       tegishli va foydali ma'lumotlarni taqdim eting.
       
@@ -87,7 +87,7 @@ class AISearchService {
   }
 
   Future<String> getDetailedAnswer(String query) async {
-    final systemPrompt = '''
+    const systemPrompt = '''
       Siz o'qituvchi yordamchisiz. Berilgan savolga batafsil va tushunarli javob bering.
       Javobingiz strukturasi:
       1. Asosiy javob (qisqacha)
