@@ -1,0 +1,24 @@
+# CodeMagic configuration for MindUp Flutter app
+
+workflows:
+  default-workflow:
+    name: MindUp Build Workflow
+    environment:
+      flutter: stable
+      xcode: latest
+      gradle: latest
+    scripts:
+      - name: Set up environment variables
+        script: |
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
+      - name: Install dependencies
+        script: |
+          flutter pub get
+      - name: Generate code
+        script: |
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Build APK
+        script: |
+          flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
