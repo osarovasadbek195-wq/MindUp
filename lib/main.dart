@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'data/services/isar_service.dart';
 import 'data/services/openai_service.dart';
-import 'data/services/gemini_service.dart';
 import 'core/services/voice_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/constants/api_constants.dart';
@@ -49,7 +48,6 @@ class MindUpApp extends StatelessWidget {
         RepositoryProvider.value(value: voiceService),
         RepositoryProvider.value(value: notificationService),
         RepositoryProvider(create: (context) => OpenAIService(apiKey: ApiConstants.openAIApiKey)),
-        RepositoryProvider(create: (context) => GeminiService(apiKey: ApiConstants.geminiApiKey)),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -57,7 +55,6 @@ class MindUpApp extends StatelessWidget {
             create: (context) => HomeBloc(
               isarService: isarService,
               openAIService: context.read<OpenAIService>(),
-              geminiService: context.read<GeminiService>(),
             ),
           ),
         ],

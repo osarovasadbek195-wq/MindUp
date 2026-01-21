@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import '../../data/models/task.dart';
 import '../../data/services/isar_service.dart';
 import '../../data/services/openai_service.dart';
-import '../../data/services/gemini_service.dart';
 import '../../core/cascade_engine.dart';
 import '../../core/utils/logger.dart';
 
@@ -61,12 +60,10 @@ class HomeError extends HomeState {
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final IsarService isarService;
   final OpenAIService? openAIService;
-  final GeminiService? geminiService;
 
   HomeBloc({
     required this.isarService,
     this.openAIService,
-    this.geminiService,
   }) : super(HomeInitial()) {
     
     on<LoadTasks>((event, emit) async {
@@ -88,22 +85,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           List<Task> newTasks = [];
           
           // 1. AI dan vazifalarni olish
-          // Avval Gemini ni sinab ko'ramiz (bepul va tezroq bo'lishi mumkin)
-          if (geminiService != null) {
-             try {
-               newTasks = await geminiService!.generateTasks(event.prompt, event.subject);
-             } catch (e) {
-               AppLogger.warning("Gemini ishlamadi, OpenAI ga o'tilmoqda: $e");
-               if (openAIService != null) {
-                 newTasks = await openAIService!.generateTasks(event.prompt, event.subject);
-               } else {
-                 rethrow;
-               }
-             }
-          } else if (openAIService != null) {
+          if (openAIService != null) {
              newTasks = await openAIService!.generateTasks(event.prompt, event.subject);
           } else {
-            throw Exception("AI xizmatlari mavjud emas");
+            throw Exception("OpenAI xizmati mavjud emas");
           }
           
           // 2. Bazaga saqlash
