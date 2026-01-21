@@ -54,7 +54,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             onPressed: () async {
               final isarService = context.read<IsarService>();
               final allTasks = await isarService.getAllTasks();
-              if (!mounted) return;
+              if (!context.mounted) return;
               
               Navigator.push(
                 context,
