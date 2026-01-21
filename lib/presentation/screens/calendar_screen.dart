@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../data/models/task.dart';
 import '../../data/models/user_profile.dart';
 import '../blocs/home_bloc.dart';
+import '../widgets/voice_assistant_widget.dart';
 import 'study_screen.dart';
 import 'ai_search_screen.dart';
 import 'analytics_screen.dart';
@@ -34,12 +35,107 @@ class _CalendarScreenState extends State<CalendarScreen> {
     context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
   }
 
+  void _handleVoiceInput(String text) async {
+    // This is where we send the 'text' variable to the AI (Gemini/OpenAI) or add it to the Task List.
+    final homeBloc = context.read<HomeBloc>();
+    
+    // Parse voice input and create task
+    _parseVoiceCommand(text, homeBloc);
+    
+    if (!mounted) return;
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Voice command: "$text"'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _parseVoiceCommand(String text, HomeBloc homeBloc) async {
+    final lowerText = text.toLowerCase();
+    
+    // Task creation patterns
+    if (lowerText.contains('add') || lowerText.contains('create') || lowerText.contains('new')) {
+      // Extract task title
+      String taskTitle = text;
+      for (String keyword in ['add', 'create', 'new', 'task']) {
+        taskTitle = taskTitle.replaceFirst(RegExp(keyword, caseSensitive: false), '').trim();
+      }
+      
+      if (taskTitle.isNotEmpty) {
+        final newTask = Task()
+          ..title = taskTitle
+          ..description = 'Added via voice'
+          ..createdAt = DateTime.now()
+          ..nextReviewDate = _selectedDay ?? DateTime.now()
+          ..subject = 'Voice Task';
+        
+        homeBloc.add(AddTask(newTask));
+      }
+    }
+    // Search patterns
+    else if (lowerText.contains('search') || lowerText.contains('find')) {
+      String query = text;
+      for (String keyword in ['search', 'find']) {
+        query = query.replaceFirst(RegExp(keyword, caseSensitive: false), '').trim();
+      }
+      
+      if (query.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AISearchScreen(initialQuery: query)),
+        );
+      }
+    }
+    // Analytics patterns
+    else if (lowerText.contains('analytics') || lowerText.contains('stats') || lowerText.contains('progress')) {
+      final isarService = context.read<IsarService>();
+      final allTasks = await isarService.getAllTasks();
+      if (!mounted) return;
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AnalyticsScreen(allTasks: allTasks),
+        ),
+      );
+    }
+    // Default: treat as task creation
+    else {
+      final newTask = Task()
+        ..title = text
+        ..description = 'Added via voice command'
+        ..createdAt = DateTime.now()
+        ..nextReviewDate = _selectedDay ?? DateTime.now()
+        ..subject = 'Voice Task';
+      
+      homeBloc.add(AddTask(newTask));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('MindUp Learning'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.mic),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => VoiceAssistantWidget(
+                  onInputComplete: _handleVoiceInput,
+                  isModal: true,
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {

@@ -24,6 +24,11 @@ class AddSmartTask extends HomeEvent {
   AddSmartTask(this.prompt, this.subject);
 }
 
+class AddTask extends HomeEvent {
+  final Task task;
+  AddTask(this.task);
+}
+
 class CompleteTask extends HomeEvent {
   final Task task;
   final bool isSuccess; // To'g'ri topdimi yoki yo'q?
@@ -111,6 +116,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           emit(HomeError("AI xatosi: $e"));
           // Xatodan keyin qayta yuklashga urinib ko'ramiz
           add(LoadTasks(currentState.selectedDate));
+        }
+      }
+    });
+
+    on<AddTask>((event, emit) async {
+      final currentState = state;
+      if (currentState is HomeLoaded) {
+        try {
+          // Bazaga saqlash
+          await isarService.saveTask(event.task);
+          
+          // Ro'yxatni yangilash
+          add(LoadTasks(currentState.selectedDate));
+        } catch (e) {
+          AppLogger.error("Vazifani qo'shishda xatolik", error: e);
+          emit(HomeError("Vazifani qo'shishda xatolik: $e"));
         }
       }
     });
