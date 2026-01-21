@@ -1,6 +1,6 @@
 class ApiConstants {
   // OpenAI API kaliti - ishlatishdan oldin o'zingizning kalitingizni yozing
-  static const String openAIApiKey = "YOUR_OPENAI_API_KEY";
+  static const String openAIApiKey = "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";
   
   // Google Gemini API kaliti - kerak bo'lganda o'zgartiring
   static const String geminiApiKey = "YOUR_GEMINI_API_KEY";
