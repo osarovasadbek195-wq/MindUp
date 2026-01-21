@@ -4,7 +4,7 @@ workflows:
   default-workflow:
     name: MindUp Build Workflow
     environment:
-      flutter: stable
+      flutter: "3.22.0"  # Fixed version
       xcode: latest
       gradle: latest
     scripts:
