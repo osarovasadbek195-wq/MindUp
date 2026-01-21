@@ -1,9 +1,8 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
-  // OpenAI API kaliti - environment variable dan oling
-  static const String openAIApiKey = String.fromEnvironment(
-    'OPENAI_API_KEY',
-    defaultValue: 'YOUR_OPENAI_API_KEY_HERE',
-  );
+  // OpenAI API kaliti - .env fayldan olinadi
+  static String get openAIApiKey => dotenv.env['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY_HERE';
   
   // API URL'lari
   static const String openAiBaseUrl = 'https://api.openai.com/v1/chat/completions';

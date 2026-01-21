@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'data/services/isar_service.dart';
 import 'data/services/openai_service.dart';
@@ -11,6 +12,9 @@ import 'presentation/screens/calendar_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // .env faylni yuklash
+  await dotenv.load(fileName: ".env");
 
   // 1. Servislarni ishga tushurish
   final isarService = IsarService();
