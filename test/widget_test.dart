@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mind_up/main.dart';
 import 'package:mind_up/data/services/isar_service.dart';
 import 'package:mind_up/core/services/voice_service.dart';
+import 'package:mind_up/core/services/notification_service.dart';
 import 'package:mind_up/data/models/task.dart';
 import 'package:mockito/mockito.dart';
 
@@ -35,22 +36,37 @@ class MockVoiceService extends Mock implements VoiceService {
   }
 }
 
+class MockNotificationService extends Mock implements NotificationService {
+  @override
+  Future<void> init() {
+    return super.noSuchMethod(
+      Invocation.method(#init, []),
+      returnValue: Future.value(),
+      returnValueForMissingStub: Future.value(),
+    );
+  }
+}
+
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
     // Mock servislarni yaratish
     final mockIsarService = MockIsarService();
     final mockVoiceService = MockVoiceService();
+    final mockNotificationService = MockNotificationService();
 
     // Stubbing
     when(mockIsarService.getTasksForDate(any))
         .thenAnswer((_) async => []);
     when(mockVoiceService.init())
         .thenAnswer((_) async => true);
+    when(mockNotificationService.init())
+        .thenAnswer((_) async {});
 
     // Appni qurish
     await tester.pumpWidget(MindUpApp(
       isarService: mockIsarService,
       voiceService: mockVoiceService,
+      notificationService: mockNotificationService,
     ));
 
     // Kuting (Splash yoki loading uchun)

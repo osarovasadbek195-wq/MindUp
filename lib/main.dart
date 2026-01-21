@@ -25,17 +25,20 @@ void main() async {
   runApp(MindUpApp(
     isarService: isarService,
     voiceService: voiceService,
+    notificationService: notificationService,
   ));
 }
 
 class MindUpApp extends StatelessWidget {
   final IsarService isarService;
   final VoiceService voiceService;
+  final NotificationService notificationService;
 
   const MindUpApp({
     super.key, 
     required this.isarService, 
-    required this.voiceService
+    required this.voiceService,
+    required this.notificationService,
   });
 
   @override
@@ -44,6 +47,7 @@ class MindUpApp extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: isarService),
         RepositoryProvider.value(value: voiceService),
+        RepositoryProvider.value(value: notificationService),
         RepositoryProvider(create: (context) => OpenAIService(apiKey: ApiConstants.openAIApiKey)),
         RepositoryProvider(create: (context) => GeminiService(apiKey: ApiConstants.geminiApiKey)),
       ],

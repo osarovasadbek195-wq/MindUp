@@ -5,6 +5,7 @@ import '../../data/models/task.dart';
 import '../../data/models/user_profile.dart';
 import '../blocs/home_bloc.dart';
 import '../widgets/voice_assistant_widget.dart';
+import '../../core/services/notification_service.dart';
 import 'study_screen.dart';
 import 'ai_search_screen.dart';
 import 'analytics_screen.dart';
@@ -33,6 +34,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _selectedDay = _focusedDay;
     // Ilk yuklanishda bugungi vazifalarni so'rash
     context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
+    
+    // 3 soatdan keyin notification yuborish
+    _schedule3HourNotification();
+  }
+
+  void _schedule3HourNotification() {
+    final notificationService = context.read<NotificationService>();
+    notificationService.scheduleNotificationIn3Hours(
+      1,
+      'MindUp Study Reminder',
+      '3 soat oldin qo\'shilgan vazifangizni tekshirib ko\'ring!',
+    );
   }
 
   void _handleVoiceInput(String text) async {

@@ -97,6 +97,31 @@ class NotificationService {
     return scheduledDate;
   }
   
+  /// 3 soatdan keyin notification yuborish
+  Future<void> scheduleNotificationIn3Hours(int id, String title, String body) async {
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledDate = now.add(const Duration(hours: 3));
+    
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'mindup_reminder_channel',
+          'Study Reminders',
+          channelDescription: 'Study reminders for MindUp',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
   Future<void> cancelAll() async {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
