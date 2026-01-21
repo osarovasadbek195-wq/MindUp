@@ -13,23 +13,54 @@ import 'presentation/screens/calendar_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // .env faylni yuklash
-  await dotenv.load(fileName: ".env");
+  try {
+    // .env faylni yuklash
+    await dotenv.load(fileName: ".env");
 
-  // 1. Servislarni ishga tushurish
-  final isarService = IsarService();
-  final voiceService = VoiceService();
-  final notificationService = NotificationService();
+    // 1. Servislarni ishga tushurish
+    final isarService = IsarService();
+    final voiceService = VoiceService();
+    final notificationService = NotificationService();
+    
+    // Asinxron initlar
+    await voiceService.init();
+    await notificationService.init();
+
+    runApp(MindUpApp(
+      isarService: isarService,
+      voiceService: voiceService,
+      notificationService: notificationService,
+    ));
+  } catch (e) {
+    // Debug app with error handling
+    runApp(DebugApp(error: e.toString()));
+  }
+}
+
+// Debug app for error handling
+class DebugApp extends StatelessWidget {
+  final String error;
   
-  // Asinxron initlar
-  await voiceService.init();
-  await notificationService.init();
+  const DebugApp({super.key, required this.error});
 
-  runApp(MindUpApp(
-    isarService: isarService,
-    voiceService: voiceService,
-    notificationService: notificationService,
-  ));
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.red,
+        appBar: AppBar(title: const Text('DEBUG ERROR')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'ERROR: $error',
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MindUpApp extends StatelessWidget {
