@@ -19,17 +19,7 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-subprojects {
-    afterEvaluate {
-        if (project.hasProperty("android")) {
-            project.android {
-                if (namespace == null) {
-                    namespace = project.group.toString()
-                }
-            }
-        }
-    }
-}
+apply(from = "namespace-fix.gradle")
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
