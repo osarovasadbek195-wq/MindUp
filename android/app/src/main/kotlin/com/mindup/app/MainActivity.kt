@@ -1,4 +1,4 @@
-package com.example.mind_up_fixed
+package com.mindup.app
 
 import io.flutter.embedding.android.FlutterActivity
 
