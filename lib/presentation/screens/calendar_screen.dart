@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../data/models/task.dart';
+import '../../data/models/user_profile.dart';
 import '../blocs/home_bloc.dart';
 import 'study_screen.dart';
 import 'ai_search_screen.dart';

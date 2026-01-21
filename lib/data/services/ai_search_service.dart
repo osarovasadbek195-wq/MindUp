@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../constants/api_constants.dart';
+import '../../core/constants/api_constants.dart';
 
 class AISearchResult {
   final String title;
