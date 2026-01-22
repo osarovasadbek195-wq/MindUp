@@ -14,8 +14,8 @@ class CascadeEngine {
       // To'g'ri topsa, keyingi bosqichga o'tkazamiz
       task.reviewCount++;
       
-      // Cascade Intervals: 0:3h, 1:6h, 2:9h, 3:1d, 4:3d, 5:7d, 6:14d, 7:30d
-      if (task.repetitionStep < 7) {
+      // Cascade Intervals: 0:3h, 1:6h, 2:9h, 3:1d, 4:3d, 5:7d, 6:14d, 7:30d, 8:45d, 9:90d
+      if (task.repetitionStep < 9) {
         task.repetitionStep++;
       }
       
@@ -25,7 +25,7 @@ class CascadeEngine {
       } else if (task.repetitionStep < 6) {
         task.stage = TaskStage.review;   // 1d, 3d, 7d
       } else {
-        task.stage = TaskStage.mastered; // 14d, 30d
+        task.stage = TaskStage.mastered; // 14d, 30d, 45d, 90d
       }
 
       // Calculate next date based on new step
@@ -53,6 +53,12 @@ class CascadeEngine {
           break;
         case 7:
           task.nextReviewDate = DateTime.now().add(const Duration(days: 30));
+          break;
+        case 8:
+          task.nextReviewDate = DateTime.now().add(const Duration(days: 45));
+          break;
+        case 9:
+          task.nextReviewDate = DateTime.now().add(const Duration(days: 90));
           break;
       }
     }

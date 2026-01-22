@@ -8,7 +8,7 @@ class ApiConstants {
   static const String openAiBaseUrl = 'https://api.openai.com/v1/chat/completions';
   
   // Sozlamalar
-  static const String defaultModel = 'gpt-3.5-turbo';
+  static const String defaultModel = 'gpt-4o-mini';
   static const double defaultTemperature = 0.7;
   static const int maxTokens = 1000;
 }

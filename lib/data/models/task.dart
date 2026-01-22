@@ -24,7 +24,7 @@ class Task {
   int reviewCount = 0; // Takrorlashlar soni
   int mistakeCount = 0; // Xatolar soni
   
-  // Cascade Intervals: 3h, 6h, 9h, 1d, 3d, 7d, 14d, 30d
+  // Cascade Intervals: 3h, 6h, 9h, 1d, 3d, 7d, 14d, 30d, 45d, 90d
   DateTime getNextReviewDate() {
     final now = DateTime.now();
     switch (repetitionStep) {
@@ -36,7 +36,9 @@ class Task {
       case 5: return now.add(const Duration(days: 7));
       case 6: return now.add(const Duration(days: 14));
       case 7: return now.add(const Duration(days: 30));
-      default: return now.add(const Duration(days: 30)); // Max interval
+      case 8: return now.add(const Duration(days: 45));
+      case 9: return now.add(const Duration(days: 90));
+      default: return now.add(const Duration(days: 90)); // Max interval
     }
   }
 
@@ -52,5 +54,5 @@ class Task {
 enum TaskStage {
   learning, // 3h, 6h, 9h
   review,   // 1d, 3d, 7d
-  mastered  // 14d, 30d
+  mastered  // 14d, 30d, 45d, 90d
 }
