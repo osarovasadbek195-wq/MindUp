@@ -5,6 +5,8 @@ import '../screens/calendar_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/analytics_screen.dart';
 import '../screens/copilot_screen.dart';
+import '../screens/add_task_screen.dart';
+import '../screens/video_resources_screen.dart';
 import '../../data/models/task.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -40,25 +42,32 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(), // Prevent swipe for better UX with tabs
         onPageChanged: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
         children: [
-          // Home / Today's Tasks
+          // 0: Home / Today's Tasks
           HomeScreen(
             onAddTask: () {
               _onTabTapped(2); // Navigate to Add screen
             },
           ),
-          // Calendar
+          // 1: Calendar
           const CalendarScreen(),
-          // Add Task (Placeholder for now, will be enhanced)
-          const AddTaskScreen(),
-          // Copilot
+          // 2: Add Task
+          AddTaskScreen(
+             onTaskAdded: () {
+               _onTabTapped(0); // Go back to Home after adding
+             }
+          ),
+          // 3: Video Resources
+          const VideoResourcesScreen(),
+          // 4: Copilot
           const CopilotScreen(),
-          // Analytics / Settings
+          // 5: Analytics / Settings
           BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
               List<Task> allTasks = [];
@@ -83,15 +92,16 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
                 _buildNavItem(Icons.calendar_today_outlined, Icons.calendar_today, 'Calendar', 1),
                 _buildAddButton(),
-                _buildNavItem(Icons.chat_outlined, Icons.chat, 'Copilot', 3),
-                _buildNavItem(Icons.pie_chart_outline, Icons.pie_chart, 'Stats', 4),
+                _buildNavItem(Icons.video_library_outlined, Icons.video_library, 'Videos', 3),
+                _buildNavItem(Icons.chat_outlined, Icons.chat, 'Copilot', 4),
+                _buildNavItem(Icons.pie_chart_outline, Icons.pie_chart, 'Stats', 5),
               ],
             ),
           ),
@@ -105,10 +115,10 @@ class _MainNavigationState extends State<MainNavigation> {
     return GestureDetector(
       onTap: () => _onTabTapped(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF3B82F6).withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -116,14 +126,14 @@ class _MainNavigationState extends State<MainNavigation> {
             Icon(
               isSelected ? activeIcon : inactiveIcon,
               color: isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade600,
-              size: 24,
+              size: 22,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
                 color: isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade600,
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -137,8 +147,8 @@ class _MainNavigationState extends State<MainNavigation> {
     return GestureDetector(
       onTap: () => _onTabTapped(2),
       child: Container(
-        width: 56,
-        height: 56,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
@@ -149,36 +159,15 @@ class _MainNavigationState extends State<MainNavigation> {
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: const Icon(
           Icons.add,
           color: Colors.white,
-          size: 28,
-        ),
-      ),
-    );
-  }
-}
-
-// Placeholder Add Task Screen
-class AddTaskScreen extends StatelessWidget {
-  const AddTaskScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'Add Task Screen\n(To be implemented)',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.grey,
-          ),
+          size: 24,
         ),
       ),
     );

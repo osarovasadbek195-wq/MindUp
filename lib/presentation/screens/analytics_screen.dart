@@ -29,15 +29,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     setState(() => isExporting = true);
     try {
       await importExportService.exportTasksToJson();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tasks exported successfully!'), backgroundColor: Colors.green),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Export failed: $e'), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() => isExporting = false);
+      if (mounted) {
+        setState(() => isExporting = false);
+      }
     }
   }
 
@@ -45,15 +49,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     setState(() => isExporting = true);
     try {
       await importExportService.exportTasksToCsv();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tasks exported to CSV!'), backgroundColor: Colors.green),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('CSV Export failed: $e'), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() => isExporting = false);
+      if (mounted) {
+        setState(() => isExporting = false);
+      }
     }
   }
 
@@ -61,6 +69,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     setState(() => isImporting = true);
     try {
       final count = await importExportService.importTasksFromJson();
+      if (!mounted) return;
+      
       if (count > 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Successfully imported $count tasks!'), backgroundColor: Colors.green),
@@ -73,11 +83,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Import failed: $e'), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() => isImporting = false);
+      if (mounted) {
+        setState(() => isImporting = false);
+      }
     }
   }
 
