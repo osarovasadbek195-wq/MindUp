@@ -81,18 +81,22 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
 
     setState(() => _isGenerating = true);
     
+    // Capture services before async gap
+    final openAIService = context.read<OpenAIService>();
+    final isarService = context.read<IsarService>();
+    final homeBloc = context.read<HomeBloc>();
+    
     try {
       final subject = _aiSubjectController.text.isNotEmpty ? _aiSubjectController.text : 'General';
-      final openAIService = context.read<OpenAIService>();
       
       final tasks = await openAIService.generateTasks(_topicController.text, subject);
       
       if (tasks.isNotEmpty) {
-        await context.read<IsarService>().saveTasks(tasks);
+        await isarService.saveTasks(tasks);
         
         if (!mounted) return;
 
-        context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
+        homeBloc.add(LoadTasks(DateTime.now()));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${tasks.length} flashcards generated!'), backgroundColor: Colors.green),
         );

@@ -3,10 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_tts
+  flutter_inappwebview_windows
   isar_flutter_libs
   share_plus
-  speech_to_text_windows
   url_launcher_windows
 )
 

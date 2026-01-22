@@ -17,6 +17,7 @@ class _CopilotScreenState extends State<CopilotScreen> {
     super.initState();
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent("Mozilla/5.0 (Linux; Android 10; Mobile; rv:88.0) Gecko/88.0 Firefox/88.0") // Force mobile UA
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
@@ -24,19 +25,27 @@ class _CopilotScreenState extends State<CopilotScreen> {
             // Update loading bar.
           },
           onPageStarted: (String url) {
-            setState(() {
-              isLoading = true;
-            });
+            if (mounted) {
+              setState(() {
+                isLoading = true;
+              });
+            }
           },
           onPageFinished: (String url) {
-            setState(() {
-              isLoading = false;
-            });
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+              });
+            }
           },
           onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            // Allow all navigation within the webview
+            return NavigationDecision.navigate;
+          },
         ),
       )
-      ..loadRequest(Uri.parse('https://copilot.microsoft.com/'));
+      ..loadRequest(Uri.parse('https://www.bing.com/copilotsearch'));
   }
 
   @override

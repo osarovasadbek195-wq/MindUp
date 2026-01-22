@@ -4,16 +4,10 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../data/models/task.dart';
 import '../../data/models/user_profile.dart';
 import '../blocs/home_bloc.dart';
-import '../widgets/voice_assistant_widget.dart';
 import '../../core/services/notification_service.dart';
 import 'study_screen.dart';
-import 'ai_search_screen.dart';
-import 'analytics_screen.dart';
-
+import 'profile_screen.dart';
 import '../../data/services/isar_service.dart';
-import '../../core/services/voice_service.dart';
-import '../../core/utils/intent_parser.dart';
-import '../../core/utils/logger.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -26,16 +20,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  bool _isListening = false;
+  String _selectedLanguage = 'All';
+
+  final List<String> _languages = ['All', 'English', 'Russian', 'Uzbek', 'Math'];
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-    // Ilk yuklanishda bugungi vazifalarni so'rash
     context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
-    
-    // 3 soatdan keyin notification yuborish
     _schedule3HourNotification();
   }
 
@@ -44,89 +37,58 @@ class _CalendarScreenState extends State<CalendarScreen> {
     notificationService.scheduleNotificationIn3Hours(
       1,
       'MindUp Study Reminder',
-      '3 soat oldin qo\'shilgan vazifangizni tekshirib ko\'ring!',
+      '3 soat o\'tdi! O\'rganganlaringizni takrorlash vaqti keldi.',
     );
   }
 
-  void _handleVoiceInput(String text) async {
-    // This is where we send the 'text' variable to the AI (Gemini/OpenAI) or add it to the Task List.
-    final homeBloc = context.read<HomeBloc>();
-    
-    // Parse voice input and create task
-    _parseVoiceCommand(text, homeBloc);
-    
-    if (!mounted) return;
-    
-    // Show feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Voice command: "$text"'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
+  void _showSmartInputDialog({String? initialSubject}) {
+    final TextEditingController promptController = TextEditingController();
+    final TextEditingController subjectController = TextEditingController(text: initialSubject);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Smart Input'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: subjectController,
+              decoration: const InputDecoration(
+                labelText: 'Subject (e.g., Math, English)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: promptController,
+              decoration: const InputDecoration(
+                labelText: 'What to learn?',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (promptController.text.isNotEmpty && subjectController.text.isNotEmpty) {
+                context.read<HomeBloc>().add(
+                  AddSmartTask(promptController.text, subjectController.text),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Generate'),
+          ),
+        ],
       ),
     );
-  }
-
-  void _parseVoiceCommand(String text, HomeBloc homeBloc) async {
-    final lowerText = text.toLowerCase();
-    
-    // Task creation patterns
-    if (lowerText.contains('add') || lowerText.contains('create') || lowerText.contains('new')) {
-      // Extract task title
-      String taskTitle = text;
-      for (String keyword in ['add', 'create', 'new', 'task']) {
-        taskTitle = taskTitle.replaceFirst(RegExp(keyword, caseSensitive: false), '').trim();
-      }
-      
-      if (taskTitle.isNotEmpty) {
-        final newTask = Task()
-          ..title = taskTitle
-          ..description = 'Added via voice'
-          ..createdAt = DateTime.now()
-          ..nextReviewDate = _selectedDay ?? DateTime.now()
-          ..subject = 'Voice Task';
-        
-        homeBloc.add(AddTask(newTask));
-      }
-    }
-    // Search patterns
-    else if (lowerText.contains('search') || lowerText.contains('find')) {
-      String query = text;
-      for (String keyword in ['search', 'find']) {
-        query = query.replaceFirst(RegExp(keyword, caseSensitive: false), '').trim();
-      }
-      
-      if (query.isNotEmpty) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AISearchScreen(initialQuery: query)),
-        );
-      }
-    }
-    // Analytics patterns
-    else if (lowerText.contains('analytics') || lowerText.contains('stats') || lowerText.contains('progress')) {
-      final isarService = context.read<IsarService>();
-      final allTasks = await isarService.getAllTasks();
-      if (!mounted) return;
-      
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AnalyticsScreen(allTasks: allTasks),
-        ),
-      );
-    }
-    // Default: treat as task creation
-    else {
-      final newTask = Task()
-        ..title = text
-        ..description = 'Added via voice command'
-        ..createdAt = DateTime.now()
-        ..nextReviewDate = _selectedDay ?? DateTime.now()
-        ..subject = 'Voice Task';
-      
-      homeBloc.add(AddTask(newTask));
-    }
   }
 
   @override
@@ -135,31 +97,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
       appBar: AppBar(
         title: const Text('MindUp Learning'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.mic),
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => VoiceAssistantWidget(
-                  onInputComplete: _handleVoiceInput,
-                  isModal: true,
-                ),
+          // Language Filter
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language),
+            onSelected: (String value) {
+              setState(() {
+                _selectedLanguage = value;
+              });
+              // TODO: Implement actual filtering logic in Bloc or here
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Filter: $value (Coming Soon)')),
               );
+            },
+            itemBuilder: (BuildContext context) {
+              return _languages.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
             },
           ),
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AISearchScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.analytics),
+            icon: const Icon(Icons.person),
             onPressed: () async {
               final isarService = context.read<IsarService>();
               final allTasks = await isarService.getAllTasks();
@@ -168,7 +128,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AnalyticsScreen(allTasks: allTasks),
+                  builder: (_) => ProfileScreen(allTasks: allTasks),
                 ),
               );
             },
@@ -190,7 +150,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFF0F4FF), Color(0xFFE8F1F8)], // Soft HyperOS Gradient
+            colors: [Color(0xFFF0F4FF), Color(0xFFE8F1F8)],
           ),
         ),
         child: BlocConsumer<HomeBloc, HomeState>(
@@ -205,6 +165,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
             List<Task> currentTasks = [];
             if (state is HomeLoaded) {
               currentTasks = state.tasks;
+              // Filter by language/subject if implemented
+              if (_selectedLanguage != 'All') {
+                 // Simple filter by subject containing language name
+                 currentTasks = currentTasks.where((t) => t.subject.contains(_selectedLanguage)).toList();
+              }
             }
 
             return SafeArea(
@@ -286,23 +251,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
           },
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            heroTag: 'voice_btn',
-            backgroundColor: _isListening ? Colors.red : Colors.deepPurple,
-            foregroundColor: Colors.white,
-            onPressed: _handleVoiceCommand,
-            child: Icon(_isListening ? Icons.mic : Icons.mic_none),
-          ),
-          const SizedBox(width: 16),
-          FloatingActionButton(
-            heroTag: 'add_btn',
-            onPressed: _showSmartInputDialog,
-            child: const Icon(Icons.auto_awesome),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'add_btn',
+        onPressed: _showSmartInputDialog,
+        child: const Icon(Icons.auto_awesome),
       ),
     );
   }
@@ -462,128 +414,5 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
       ],
     );
-  }
-
-  void _showSmartInputDialog({String? initialSubject}) {
-    final TextEditingController promptController = TextEditingController();
-    final TextEditingController subjectController = TextEditingController(text: initialSubject);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Smart Input'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: subjectController,
-              decoration: const InputDecoration(
-                labelText: 'Subject (e.g., Math, English)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: promptController,
-              decoration: const InputDecoration(
-                labelText: 'What to learn? (e.g., 5 difficult SAT words)',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (promptController.text.isNotEmpty && subjectController.text.isNotEmpty) {
-                context.read<HomeBloc>().add(
-                  AddSmartTask(promptController.text, subjectController.text),
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Generate'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _handleVoiceCommand() async {
-    final voiceService = context.read<VoiceService>();
-    
-    if (_isListening) {
-      await voiceService.stopListening();
-      setState(() => _isListening = false);
-    } else {
-      setState(() => _isListening = true);
-      await voiceService.startListening(
-        onResult: (text) {
-          AppLogger.info("Voice result: $text");
-          
-          // Stop listening after command received
-          voiceService.stopListening();
-          setState(() => _isListening = false);
-
-          // Parse and process
-          final intent = IntentParser.parse(text);
-          _processIntent(intent);
-        },
-      );
-    }
-  }
-
-  void _processIntent(VoiceIntent intent) {
-    switch (intent.type) {
-      case IntentType.add:
-        // "Learn Math" -> open dialog with Math pre-filled
-        _showSmartInputDialog(initialSubject: intent.data);
-        break;
-      case IntentType.stats:
-        // Navigate to analytics
-        _navigateToAnalytics();
-        break;
-      case IntentType.study:
-        // Load today's tasks
-        setState(() {
-          _focusedDay = DateTime.now();
-          _selectedDay = DateTime.now();
-        });
-        context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
-        break;
-      case IntentType.search:
-        if (intent.data != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AISearchScreen(initialQuery: intent.data),
-            ),
-          );
-        }
-        break;
-      case IntentType.unknown:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Tushunarsiz buyruq: ${intent.data}")),
-        );
-        break;
-    }
-  }
-
-  Future<void> _navigateToAnalytics() async {
-    final isarService = context.read<IsarService>();
-    final allTasks = await isarService.getAllTasks();
-    if (mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AnalyticsScreen(allTasks: allTasks),
-        ),
-      );
-    }
   }
 }

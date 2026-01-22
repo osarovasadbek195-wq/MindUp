@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/task.dart';
 import '../blocs/home_bloc.dart';
 import 'study_screen.dart';
+import 'quiz_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onAddTask;
@@ -30,6 +31,25 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.quiz, color: Colors.deepPurple),
+            tooltip: 'Quiz Mode',
+            onPressed: () {
+              final state = context.read<HomeBloc>().state;
+              if (state is HomeLoaded && state.tasks.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuizScreen(tasks: state.tasks),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No tasks available for quiz!')),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {

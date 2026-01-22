@@ -4,7 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'data/services/isar_service.dart';
 import 'data/services/openai_service.dart';
-import 'core/services/voice_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/constants/api_constants.dart';
 import 'presentation/blocs/home_bloc.dart';
@@ -19,16 +18,13 @@ void main() async {
 
     // 1. Servislarni ishga tushurish
     final isarService = IsarService();
-    final voiceService = VoiceService();
     final notificationService = NotificationService();
     
     // Asinxron initlar
-    await voiceService.init();
     await notificationService.init();
 
     runApp(MindUpApp(
       isarService: isarService,
-      voiceService: voiceService,
       notificationService: notificationService,
     ));
   } catch (e) {
@@ -65,13 +61,11 @@ class DebugApp extends StatelessWidget {
 
 class MindUpApp extends StatelessWidget {
   final IsarService isarService;
-  final VoiceService voiceService;
   final NotificationService notificationService;
 
   const MindUpApp({
     super.key, 
     required this.isarService, 
-    required this.voiceService,
     required this.notificationService,
   });
 
@@ -80,7 +74,6 @@ class MindUpApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(value: isarService),
-        RepositoryProvider.value(value: voiceService),
         RepositoryProvider.value(value: notificationService),
         RepositoryProvider(create: (context) => OpenAIService(apiKey: ApiConstants.openAIApiKey)),
       ],

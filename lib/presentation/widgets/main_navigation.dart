@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/home_bloc.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/home_screen.dart';
-import '../screens/analytics_screen.dart';
+import '../screens/profile_screen.dart';
 import '../screens/copilot_screen.dart';
 import '../screens/add_task_screen.dart';
 import '../screens/video_resources_screen.dart';
@@ -67,14 +67,14 @@ class _MainNavigationState extends State<MainNavigation> {
           const VideoResourcesScreen(),
           // 4: Copilot
           const CopilotScreen(),
-          // 5: Analytics / Settings
+          // 5: Profile / Stats
           BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
               List<Task> allTasks = [];
               if (state is HomeLoaded) {
                 allTasks = state.tasks;
               }
-              return AnalyticsScreen(allTasks: allTasks);
+              return ProfileScreen(allTasks: allTasks);
             },
           ),
         ],
@@ -101,7 +101,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 _buildAddButton(),
                 _buildNavItem(Icons.video_library_outlined, Icons.video_library, 'Videos', 3),
                 _buildNavItem(Icons.chat_outlined, Icons.chat, 'Copilot', 4),
-                _buildNavItem(Icons.pie_chart_outline, Icons.pie_chart, 'Stats', 5),
+                _buildNavItem(Icons.person_outline, Icons.person, 'Profile', 5),
               ],
             ),
           ),

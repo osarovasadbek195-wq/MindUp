@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'copilot_screen.dart';
 
 class VideoResourcesScreen extends StatefulWidget {
   const VideoResourcesScreen({super.key});
@@ -65,15 +66,13 @@ class _VideoResourcesScreenState extends State<VideoResourcesScreen> {
     }
   }
 
-  Future<void> _launchVideo(String videoUrl) async {
-    final Uri url = Uri.parse(videoUrl);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch video')),
-        );
-      }
-    }
+  void _openVideoPlayer(Video video) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VideoPlayerScreen(videoId: video.id.value, title: video.title),
+      ),
+    );
   }
 
   @override
@@ -85,6 +84,17 @@ class _VideoResourcesScreenState extends State<VideoResourcesScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CopilotScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF3B82F6),
+        tooltip: 'Ask Copilot',
+        child: const Icon(Icons.chat, color: Colors.white),
       ),
       body: Column(
         children: [
@@ -184,11 +194,11 @@ class _VideoResourcesScreenState extends State<VideoResourcesScreen> {
                             color: Colors.white,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(16),
-                              onTap: () => _launchVideo(video.url),
+                              onTap: () => _openVideoPlayer(video),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Thumbnail (Placeholder or using network image if available)
+                                  // Thumbnail
                                   Container(
                                     height: 180,
                                     decoration: BoxDecoration(
@@ -197,7 +207,7 @@ class _VideoResourcesScreenState extends State<VideoResourcesScreen> {
                                       image: DecorationImage(
                                         image: NetworkImage(video.thumbnails.highResUrl),
                                         fit: BoxFit.cover,
-                                        onError: (_, __) {}, // Fallback handled by color
+                                        onError: (_, __) {},
                                       ),
                                     ),
                                     child: Stack(
@@ -254,7 +264,6 @@ class _VideoResourcesScreenState extends State<VideoResourcesScreen> {
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                            // Views can be added if available in the model easily
                                           ],
                                         ),
                                       ],
@@ -278,5 +287,72 @@ class _VideoResourcesScreenState extends State<VideoResourcesScreen> {
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "${duration.inHours > 0 ? '${duration.inHours}:' : ''}$twoDigitMinutes:$twoDigitSeconds";
+  }
+}
+
+class VideoPlayerScreen extends StatefulWidget {
+  final String videoId;
+  final String title;
+
+  const VideoPlayerScreen({super.key, required this.videoId, required this.title});
+
+  @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  late YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController(
+      initialVideoId: widget.videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title, style: const TextStyle(fontSize: 16)),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.black,
+      body: Center(
+        child: YoutubePlayer(
+          controller: _controller,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.blueAccent,
+          onReady: () {
+            // Player is ready
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Pause video and open Copilot
+          _controller.pause();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CopilotScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF3B82F6),
+        tooltip: 'Ask Copilot about this video',
+        child: const Icon(Icons.chat, color: Colors.white),
+      ),
+    );
   }
 }
