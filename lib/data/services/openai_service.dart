@@ -10,20 +10,22 @@ class OpenAIService {
 
   Future<List<Task>> generateTasks(String prompt, String subject) async {
     final systemPrompt = '''
-      You are a helpful study assistant. The user wants to learn about "$subject".
-      Based on the user's request: "$prompt", generate a list of 5-10 active recall questions.
-      
-      Focus on "Active Recall". The title should be a challenging question, and the description should be the answer.
-      
-      Return ONLY a JSON array. No markdown, no extra text.
-      Format:
-      [
-        {
-          "title": "Question (e.g., What is the formula for...?)",
-          "description": "Answer (e.g., F=ma)"
-        }
-      ]
-    ''';
+You are a flashcard generation assistant. Based on the user's input about "$subject", generate 5-10 flashcard pairs.
+
+CRITICAL: Return ONLY a raw JSON array. No markdown formatting, no explanations, no ```json``` wrapper.
+
+Format exactly:
+[{"front": "question", "back": "answer"}, {"front": "question2", "back": "answer2"}]
+
+Rules:
+- "front" must be a clear question
+- "back" must be the concise answer
+- Ensure valid JSON syntax
+- No trailing commas
+- No additional text
+
+User input: "$prompt"
+''';
 
     try {
       final response = await http.post(
@@ -44,23 +46,24 @@ class OpenAIService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final content = data['choices'][0]['message']['content'];
+        final content = data['choices'][0]['message']['content'].trim();
         
-        // JSON ni tozalash (ba'zan ```json ... ``` ichida keladi)
-        String cleanJson = content.replaceAll('```json', '').replaceAll('```', '').trim();
-        
-        final List<dynamic> jsonList = jsonDecode(cleanJson);
-        
-        return jsonList.map((item) {
-          final task = Task()
-            ..title = item['title']
-            ..description = item['description']
-            ..subject = subject
-            ..createdAt = DateTime.now()
-            ..nextReviewDate = DateTime.now()
-            ..stage = TaskStage.learning;
-          return task;
-        }).toList();
+        try {
+          final List<dynamic> jsonList = jsonDecode(content);
+          
+          return jsonList.map((item) {
+            final task = Task()
+              ..title = item['front'] ?? item['title'] ?? 'No question'
+              ..description = item['back'] ?? item['description'] ?? 'No answer'
+              ..subject = subject
+              ..createdAt = DateTime.now()
+              ..nextReviewDate = DateTime.now()
+              ..stage = TaskStage.learning;
+            return task;
+          }).toList();
+        } catch (e) {
+          throw Exception('Failed to parse JSON response from OpenAI: $e. Content was: $content');
+        }
       } else {
         throw Exception('OpenAI Error: ${response.statusCode} - ${response.body}');
       }

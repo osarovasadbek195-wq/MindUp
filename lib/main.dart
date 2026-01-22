@@ -8,7 +8,7 @@ import 'core/services/voice_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/constants/api_constants.dart';
 import 'presentation/blocs/home_bloc.dart';
-import 'presentation/screens/calendar_screen.dart';
+import 'presentation/widgets/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -140,7 +140,7 @@ class MindUpApp extends StatelessWidget {
               ),
             ),
           ),
-          home: const CalendarScreen(),
+          home: const MainNavigation(),
         ),
       ),
     );

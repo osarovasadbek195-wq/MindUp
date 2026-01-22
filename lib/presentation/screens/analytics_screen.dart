@@ -1,18 +1,92 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/task.dart';
+import '../../data/services/isar_service.dart';
+import '../../data/services/import_export_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/home_bloc.dart';
 
-class AnalyticsScreen extends StatelessWidget {
+class AnalyticsScreen extends StatefulWidget {
   final List<Task> allTasks;
 
   const AnalyticsScreen({super.key, required this.allTasks});
 
   @override
+  State<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  ImportExportService? _importExportService;
+  bool isExporting = false;
+  bool isImporting = false;
+
+  ImportExportService get importExportService {
+    _importExportService ??= ImportExportService(context.read<IsarService>());
+    return _importExportService!;
+  }
+
+  Future<void> _handleExportJson() async {
+    setState(() => isExporting = true);
+    try {
+      await importExportService.exportTasksToJson();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tasks exported successfully!'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Export failed: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => isExporting = false);
+    }
+  }
+
+  Future<void> _handleExportCsv() async {
+    setState(() => isExporting = true);
+    try {
+      await importExportService.exportTasksToCsv();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tasks exported to CSV!'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('CSV Export failed: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => isExporting = false);
+    }
+  }
+
+  Future<void> _handleImport() async {
+    setState(() => isImporting = true);
+    try {
+      final count = await importExportService.importTasksFromJson();
+      if (count > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Successfully imported $count tasks!'), backgroundColor: Colors.green),
+        );
+        // Refresh the data
+        context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No tasks imported or file was invalid.'), backgroundColor: Colors.orange),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Import failed: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() => isImporting = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Statistikani hisoblash
-    int masterCount = allTasks.where((t) => t.stage == TaskStage.master).length;
-    int learningCount = allTasks.where((t) => t.stage == TaskStage.learning).length;
-    int reviewingCount = allTasks.length - masterCount - learningCount;
+    // Statistikani hisoblash (using new stages)
+    int masterCount = widget.allTasks.where((t) => t.stage == TaskStage.mastered).length;
+    int learningCount = widget.allTasks.where((t) => t.stage == TaskStage.learning).length;
+    int reviewingCount = widget.allTasks.where((t) => t.stage == TaskStage.review).length;
     
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -45,7 +119,117 @@ class AnalyticsScreen extends StatelessWidget {
                   ],
                 ),
                 
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+
+                // Import/Export Buttons
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Data Management",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: isImporting ? null : _handleImport,
+                              icon: isImporting 
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.upload_file, size: 18),
+                              label: Text(isImporting ? 'Importing...' : 'Import'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: PopupMenuButton<String>(
+                              onSelected: (value) {
+                                if (value == 'json') {
+                                  _handleExportJson();
+                                } else if (value == 'csv') {
+                                  _handleExportCsv();
+                                }
+                              },
+                              child: ElevatedButton.icon(
+                                onPressed: isExporting ? null : () {},
+                                icon: isExporting 
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Icon(Icons.download, size: 18),
+                                label: Text(isExporting ? 'Exporting...' : 'Export'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                              itemBuilder: (BuildContext context) => [
+                                const PopupMenuItem<String>(
+                                  value: 'json',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.code, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Export as JSON'),
+                                    ],
+                                  ),
+                                ),
+                                const PopupMenuItem<String>(
+                                  value: 'csv',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.grid_on, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Export as CSV'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
                 
                 // Chart Container
                 Expanded(
@@ -74,7 +258,7 @@ class AnalyticsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),
                         Expanded(
-                          child: allTasks.isEmpty 
+                          child: widget.allTasks.isEmpty 
                           ? const Center(child: Text("No data yet", style: TextStyle(color: Colors.grey)))
                           : PieChart(
                             PieChartData(
@@ -82,21 +266,21 @@ class AnalyticsScreen extends StatelessWidget {
                                 PieChartSectionData(
                                   color: const Color(0xFFAB47BC), // Purple 400
                                   value: masterCount.toDouble(),
-                                  title: '${((masterCount/allTasks.length)*100).toInt()}%',
+                                  title: '${((masterCount/widget.allTasks.length)*100).toInt()}%',
                                   radius: 60,
                                   titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                                 PieChartSectionData(
                                   color: const Color(0xFF42A5F5), // Blue 400
                                   value: learningCount.toDouble(),
-                                  title: '${((learningCount/allTasks.length)*100).toInt()}%',
+                                  title: '${((learningCount/widget.allTasks.length)*100).toInt()}%',
                                   radius: 50,
                                   titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                                 PieChartSectionData(
                                   color: const Color(0xFFFFA726), // Orange 400
                                   value: reviewingCount.toDouble(),
-                                  title: '${((reviewingCount/allTasks.length)*100).toInt()}%',
+                                  title: '${((reviewingCount/widget.allTasks.length)*100).toInt()}%',
                                   radius: 55,
                                   titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),

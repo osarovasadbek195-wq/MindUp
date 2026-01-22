@@ -334,7 +334,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             leading: CircleAvatar(
               backgroundColor: _getStageColor(task.stage),
               child: Text(
-                '${task.reviewCount}',
+                '${task.repetitionStep}',
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
@@ -407,11 +407,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Color _getStageColor(TaskStage stage) {
     switch (stage) {
       case TaskStage.learning: return Colors.blue;
-      case TaskStage.review1: return Colors.orange;
-      case TaskStage.review2: return Colors.amber;
-      case TaskStage.review3: return Colors.green;
-      case TaskStage.solidify: return Colors.teal;
-      case TaskStage.master: return Colors.purple;
+      case TaskStage.review: return Colors.orange;
+      case TaskStage.mastered: return Colors.purple;
     }
   }
 

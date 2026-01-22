@@ -42,29 +42,34 @@ const TaskSchema = CollectionSchema(
       name: r'nextReviewDate',
       type: IsarType.dateTime,
     ),
-    r'reviewCount': PropertySchema(
+    r'repetitionStep': PropertySchema(
       id: 5,
+      name: r'repetitionStep',
+      type: IsarType.long,
+    ),
+    r'reviewCount': PropertySchema(
+      id: 6,
       name: r'reviewCount',
       type: IsarType.long,
     ),
     r'stage': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'stage',
       type: IsarType.byte,
       enumMap: _TaskstageEnumValueMap,
     ),
     r'subject': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'subject',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'title',
       type: IsarType.string,
     ),
     r'webId': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'webId',
       type: IsarType.long,
     )
@@ -164,11 +169,12 @@ void _taskSerialize(
   writer.writeDateTime(offsets[2], object.lastReviewedAt);
   writer.writeLong(offsets[3], object.mistakeCount);
   writer.writeDateTime(offsets[4], object.nextReviewDate);
-  writer.writeLong(offsets[5], object.reviewCount);
-  writer.writeByte(offsets[6], object.stage.index);
-  writer.writeString(offsets[7], object.subject);
-  writer.writeString(offsets[8], object.title);
-  writer.writeLong(offsets[9], object.webId);
+  writer.writeLong(offsets[5], object.repetitionStep);
+  writer.writeLong(offsets[6], object.reviewCount);
+  writer.writeByte(offsets[7], object.stage.index);
+  writer.writeString(offsets[8], object.subject);
+  writer.writeString(offsets[9], object.title);
+  writer.writeLong(offsets[10], object.webId);
 }
 
 Task _taskDeserialize(
@@ -184,11 +190,12 @@ Task _taskDeserialize(
   object.lastReviewedAt = reader.readDateTimeOrNull(offsets[2]);
   object.mistakeCount = reader.readLong(offsets[3]);
   object.nextReviewDate = reader.readDateTime(offsets[4]);
-  object.reviewCount = reader.readLong(offsets[5]);
-  object.stage = _TaskstageValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+  object.repetitionStep = reader.readLong(offsets[5]);
+  object.reviewCount = reader.readLong(offsets[6]);
+  object.stage = _TaskstageValueEnumMap[reader.readByteOrNull(offsets[7])] ??
       TaskStage.learning;
-  object.subject = reader.readString(offsets[7]);
-  object.title = reader.readString(offsets[8]);
+  object.subject = reader.readString(offsets[8]);
+  object.title = reader.readString(offsets[9]);
   return object;
 }
 
@@ -212,13 +219,15 @@ P _taskDeserializeProp<P>(
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
       return (_TaskstageValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskStage.learning) as P;
-    case 7:
-      return (reader.readString(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -227,19 +236,13 @@ P _taskDeserializeProp<P>(
 
 const _TaskstageEnumValueMap = {
   'learning': 0,
-  'review1': 1,
-  'review2': 2,
-  'review3': 3,
-  'solidify': 4,
-  'master': 5,
+  'review': 1,
+  'mastered': 2,
 };
 const _TaskstageValueEnumMap = {
   0: TaskStage.learning,
-  1: TaskStage.review1,
-  2: TaskStage.review2,
-  3: TaskStage.review3,
-  4: TaskStage.solidify,
-  5: TaskStage.master,
+  1: TaskStage.review,
+  2: TaskStage.mastered,
 };
 
 Id _taskGetId(Task object) {
@@ -1138,6 +1141,59 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterFilterCondition> repetitionStepEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'repetitionStep',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> repetitionStepGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'repetitionStep',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> repetitionStepLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'repetitionStep',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterFilterCondition> repetitionStepBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'repetitionStep',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterFilterCondition> reviewCountEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -1618,6 +1674,18 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterSortBy> sortByRepetitionStep() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repetitionStep', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByRepetitionStepDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repetitionStep', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> sortByReviewCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'reviewCount', Sort.asc);
@@ -1752,6 +1820,18 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterSortBy> thenByRepetitionStep() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repetitionStep', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByRepetitionStepDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'repetitionStep', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> thenByReviewCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'reviewCount', Sort.asc);
@@ -1845,6 +1925,12 @@ extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
     });
   }
 
+  QueryBuilder<Task, Task, QDistinct> distinctByRepetitionStep() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'repetitionStep');
+    });
+  }
+
   QueryBuilder<Task, Task, QDistinct> distinctByReviewCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'reviewCount');
@@ -1912,6 +1998,12 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
   QueryBuilder<Task, DateTime, QQueryOperations> nextReviewDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nextReviewDate');
+    });
+  }
+
+  QueryBuilder<Task, int, QQueryOperations> repetitionStepProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'repetitionStep');
     });
   }
 

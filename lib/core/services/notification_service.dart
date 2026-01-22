@@ -122,6 +122,28 @@ class NotificationService {
     );
   }
 
+  /// Aniq bir vaqtda notification rejalashtirish
+  Future<void> scheduleNotification(int id, String title, String body, DateTime scheduledTime) async {
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'mindup_study_channel',
+          'Study Reminders',
+          channelDescription: 'Reminders for spaced repetition reviews',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
   Future<void> cancelAll() async {
     await flutterLocalNotificationsPlugin.cancelAll();
   }

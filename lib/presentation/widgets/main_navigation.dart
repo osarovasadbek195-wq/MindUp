@@ -1,0 +1,186 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/home_bloc.dart';
+import '../screens/calendar_screen.dart';
+import '../screens/home_screen.dart';
+import '../screens/analytics_screen.dart';
+import '../screens/copilot_screen.dart';
+import '../../data/models/task.dart';
+
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+
+  @override
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends State<MainNavigation> {
+  int _currentIndex = 0;
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: [
+          // Home / Today's Tasks
+          HomeScreen(
+            onAddTask: () {
+              _onTabTapped(2); // Navigate to Add screen
+            },
+          ),
+          // Calendar
+          const CalendarScreen(),
+          // Add Task (Placeholder for now, will be enhanced)
+          const AddTaskScreen(),
+          // Copilot
+          const CopilotScreen(),
+          // Analytics / Settings
+          BlocBuilder<HomeBloc, HomeState>(
+            builder: (context, state) {
+              List<Task> allTasks = [];
+              if (state is HomeLoaded) {
+                allTasks = state.tasks;
+              }
+              return AnalyticsScreen(allTasks: allTasks);
+            },
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.95),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
+                _buildNavItem(Icons.calendar_today_outlined, Icons.calendar_today, 'Calendar', 1),
+                _buildAddButton(),
+                _buildNavItem(Icons.chat_outlined, Icons.chat, 'Copilot', 3),
+                _buildNavItem(Icons.pie_chart_outline, Icons.pie_chart, 'Stats', 4),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData inactiveIcon, IconData activeIcon, String label, int index) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => _onTabTapped(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF3B82F6).withValues(alpha: 0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? activeIcon : inactiveIcon,
+              color: isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade600,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade600,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton() {
+    return GestureDetector(
+      onTap: () => _onTabTapped(2),
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 28,
+        ),
+      ),
+    );
+  }
+}
+
+// Placeholder Add Task Screen
+class AddTaskScreen extends StatelessWidget {
+  const AddTaskScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text(
+          'Add Task Screen\n(To be implemented)',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+}
