@@ -126,9 +126,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
         if (!mounted) return;
 
         homeBloc.add(LoadTasks(DateTime.now()));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${tasks.length} flashcards generated!'), backgroundColor: Colors.green),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${tasks.length} flashcards generated!'), backgroundColor: Colors.green),
+          );
+        }
         _topicController.clear();
         widget.onTaskAdded?.call();
       }
@@ -226,18 +228,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
+          const Container(
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.3)),
+              color: Color(0xFF3B82F6).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+              border: Border.all(color: Color(0xFF3B82F6).withValues(alpha: 0.3)),
             ),
-            child: Row(
+            child: const Row(
               children: [
-                const Icon(Icons.auto_awesome, color: Color(0xFF3B82F6)),
-                const SizedBox(width: 12),
-                const Expanded(
+                Icon(Icons.auto_awesome, color: Color(0xFF3B82F6)),
+                SizedBox(width: 12),
+                Expanded(
                   child: Text(
                     'Generate flashcards instantly from any topic using AI.',
                     style: TextStyle(color: Color(0xFF1F2937), fontSize: 14),
