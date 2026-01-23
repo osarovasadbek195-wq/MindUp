@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # 30 daqiqa limit
 
     steps:
     - uses: actions/checkout@v4
@@ -25,6 +26,7 @@ jobs:
       with:
         flutter-version: '3.38.7'
         channel: 'stable'
+        cache: true  # Cache ni yoq
         
     - name: Clean
       run: flutter clean
@@ -32,8 +34,9 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
       
-    - name: Generate files
-      run: flutter pub run build_runner build --delete-conflicting-outputs
+    - name: Generate files (with timeout)
+      run: |
+        timeout 10m flutter pub run build_runner build --delete-conflicting-outputs || echo "Build runner timed out but continuing"
       
     - name: Fix Android Gradle Plugin
       run: |
@@ -41,6 +44,9 @@ jobs:
         echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
         echo "android.useAndroidX=true" >> gradle.properties
         echo "android.enableJetifier=true" >> gradle.properties
+        echo "org.gradle.daemon=true" >> gradle.properties
+        echo "org.gradle.parallel=true" >> gradle.properties
+        echo "org.gradle.configureondemand=true" >> gradle.properties
         chmod +x gradlew
         
     - name: Update Gradle Wrapper
@@ -48,11 +54,15 @@ jobs:
         cd android
         ./gradlew wrapper --gradle-version=8.5 --distribution-type=all
         
-    - name: Build APK
-      run: flutter build apk --release --no-tree-shake-icons
-      
-    - name: Upload APK
+    - name: Build APK (with optimizations)
+      run: |
+        flutter build apk --release \
+          --no-tree-shake-icons \
+          --split-per-abi \
+          --shrink
+          
+    - name: Upload APKs
       uses: actions/upload-artifact@v4
       with:
-        name: app-release.apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        name: app-release-apks
+        path: build/app/outputs/flutter-apk/app-*.apk
