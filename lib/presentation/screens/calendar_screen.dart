@@ -280,21 +280,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
             colors: [Color(0xFFF0F4FF), Color(0xFFE8F1F8)],
           ),
         ),
-        child: BlocConsumer<HomeBloc, HomeState>(
-          listener: (context, state) {
-            if (state is HomeError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
+        child: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            if (state is HomeLoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
               );
             }
-          },
-          builder: (context, state) {
+            
+            if (state is HomeError) {
+              return Center(
+                child: Text(
+                  'Error: ${state.message}',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            }
+            
             List<Task> currentTasks = [];
             if (state is HomeLoaded) {
               currentTasks = state.tasks;
               // Filter by language/subject if implemented
               if (_selectedLanguage != 'All') {
-                 // Simple filter by subject containing language name
                  currentTasks = currentTasks.where((t) => t.subject.contains(_selectedLanguage)).toList();
               }
             }
@@ -322,6 +329,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       focusedDay: _focusedDay,
                       calendarFormat: _calendarFormat,
                       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                      eventLoader: (day) {
+                        return currentTasks.where((task) {
+                          return isSameDay(task.nextReviewDate, day);
+                        }).toList();
+                      },
                       onDaySelected: (selectedDay, focusedDay) {
                         if (!isSameDay(_selectedDay, selectedDay)) {
                           setState(() {
@@ -338,15 +350,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           });
                         }
                       },
-                      onPageChanged: (focusedDay) {
-                        _focusedDay = focusedDay;
-                      },
-                      eventLoader: (day) => [], 
                       headerStyle: const HeaderStyle(
                         formatButtonVisible: false,
                         titleCentered: true,
                         titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
+                      onPageChanged: (focusedDay) {
+                        _focusedDay = focusedDay;
+                      },
                       calendarStyle: CalendarStyle(
                         todayDecoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
@@ -362,6 +373,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               offset: const Offset(0, 4),
                             )
                           ],
+                        ),
+                        markersMaxCount: 3,
+                        markerDecoration: const BoxDecoration(
+                          color: Color(0xFF3B82F6),
+                          shape: BoxShape.circle,
                         ),
                       ),
                     ),
@@ -417,33 +433,37 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildTaskList(List<Task> tasks) {
     if (tasks.isEmpty) {
-      return Center(
+      return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.event_available, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
+            Icon(Icons.event_available, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
             Text(
               'No tasks for this day',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),
+              style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ],
         ),
       );
     }
 
-    return ListView.builder(
+    return ListView.separated(
       itemCount: tasks.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 4),
       itemBuilder: (context, index) {
         final task = tasks[index];
         return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          elevation: 0,
           child: ListTile(
+            dense: true,
             leading: CircleAvatar(
+              radius: 20,
               backgroundColor: _getStageColor(task.stage),
               child: Text(
                 '${task.repetitionStep}',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),
             title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),

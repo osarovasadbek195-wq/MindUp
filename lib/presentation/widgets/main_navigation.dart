@@ -18,65 +18,23 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  final PageController _pageController = PageController();
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
+  
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
     });
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // Prevent swipe for better UX with tabs
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        children: [
-          // 0: Home / Today's Tasks
-          HomeScreen(
-            onAddTask: () {
-              _onTabTapped(2); // Navigate to Add screen
-            },
-          ),
-          // 1: Calendar
-          const CalendarScreen(),
-          // 2: Add Task
-          AddTaskScreen(
-             onTaskAdded: () {
-               _onTabTapped(0); // Go back to Home after adding
-             }
-          ),
-          // 3: Study Hub
-          const HubScreen(),
-          // 4: MindUp AI
-          const MindUpAIScreen(),
-          // 5: Profile / Stats
-          BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              List<Task> allTasks = [];
-              if (state is HomeLoaded) {
-                allTasks = state.tasks;
-              }
-              return ProfileScreen(allTasks: allTasks);
-            },
-          ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: const [
+          CalendarScreen(),
+          HomeScreen(),
+          HubScreen(),
+          MindUpAIScreen(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -96,12 +54,11 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
-                _buildNavItem(Icons.calendar_today_outlined, Icons.calendar_today, 'Calendar', 1),
+                _buildNavItem(Icons.calendar_today_outlined, Icons.calendar_today, 'Calendar', 0),
+                _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 1),
                 _buildAddButton(),
-                _buildNavItem(Icons.school_outlined, Icons.school, 'Hub', 3),
-                _buildNavItem(Icons.smart_toy_outlined, Icons.smart_toy, 'AI', 4),
-                _buildNavItem(Icons.person_outline, Icons.person, 'Profile', 5),
+                _buildNavItem(Icons.school_outlined, Icons.school, 'Hub', 2),
+                _buildNavItem(Icons.smart_toy_outlined, Icons.smart_toy, 'AI', 3),
               ],
             ),
           ),
@@ -145,7 +102,12 @@ class _MainNavigationState extends State<MainNavigation> {
 
   Widget _buildAddButton() {
     return GestureDetector(
-      onTap: () => _onTabTapped(2),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+        );
+      },
       child: Container(
         width: 48,
         height: 48,
