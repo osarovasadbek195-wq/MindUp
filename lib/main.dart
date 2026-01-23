@@ -5,7 +5,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'data/services/isar_service.dart';
 import 'data/services/google_ai_service.dart';
 import 'core/services/notification_service.dart';
-import 'core/constants/api_constants.dart';
 import 'presentation/blocs/home_bloc.dart';
 import 'presentation/widgets/main_navigation.dart';
 
@@ -19,6 +18,7 @@ void main() async {
     // 1. Servislarni ishga tushurish
     final isarService = IsarService();
     final notificationService = NotificationService();
+    final googleAIService = GoogleAIService(apiKey: dotenv.env['GEMINI_API_KEY'] ?? '');
     
     // Asinxron initlar
     await notificationService.init();
@@ -26,6 +26,7 @@ void main() async {
     runApp(MindUpApp(
       isarService: isarService,
       notificationService: notificationService,
+      googleAIService: googleAIService,
     ));
   } catch (e) {
     // Debug app with error handling
@@ -62,11 +63,13 @@ class DebugApp extends StatelessWidget {
 class MindUpApp extends StatelessWidget {
   final IsarService isarService;
   final NotificationService notificationService;
+  final GoogleAIService googleAIService;
 
   const MindUpApp({
     super.key, 
     required this.isarService, 
     required this.notificationService,
+    required this.googleAIService,
   });
 
   @override
@@ -75,14 +78,14 @@ class MindUpApp extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: isarService),
         RepositoryProvider.value(value: notificationService),
-        RepositoryProvider(create: (context) => GoogleAIService(apiKey: ApiConstants.googleAIApiKey)),
+        RepositoryProvider.value(value: googleAIService),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
             create: (context) => HomeBloc(
               isarService: isarService,
-              googleAIService: context.read<GoogleAIService>(),
+              googleAIService: googleAIService,
               notificationService: notificationService,
             ),
           ),

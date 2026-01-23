@@ -7,6 +7,7 @@ import '../blocs/home_bloc.dart';
 import '../../core/services/notification_service.dart';
 import 'study_screen.dart';
 import 'profile_screen.dart';
+import 'mindup_ai_screen.dart';
 import '../../data/services/isar_service.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -137,7 +138,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _scheduleFlashcardNotifications(upcomingTasks.take(3).toList());
+                  _scheduleFlashcardNotifications(upcomingTasks.take(3).toList());
               },
               child: const Text('Schedule 3 Notifications'),
             ),
@@ -163,56 +164,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       SnackBar(
         content: Text('${flashcards.length} flashcard notifications scheduled!'),
         backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _showSmartInputDialog({String? initialSubject}) {
-    final TextEditingController promptController = TextEditingController();
-    final TextEditingController subjectController = TextEditingController(text: initialSubject);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Smart Input'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: subjectController,
-              decoration: const InputDecoration(
-                labelText: 'Subject (e.g., Math, English)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: promptController,
-              decoration: const InputDecoration(
-                labelText: 'What to learn?',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (promptController.text.isNotEmpty && subjectController.text.isNotEmpty) {
-                context.read<HomeBloc>().add(
-                  AddSmartTask(promptController.text, subjectController.text),
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Generate'),
-          ),
-        ],
       ),
     );
   }
@@ -398,6 +349,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
+            heroTag: 'ai_btn',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MindUpAIScreen()),
+              );
+            },
+            backgroundColor: const Color(0xFF3B82F6),
+            mini: true,
+            child: const Icon(Icons.psychology, size: 20),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
             heroTag: 'time_btn',
             onPressed: _showTasksWithReviewTimes,
             backgroundColor: Colors.green,
@@ -419,12 +383,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             backgroundColor: Colors.orange,
             mini: true,
             child: const Icon(Icons.notifications, size: 20),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton(
-            heroTag: 'add_btn',
-            onPressed: _showSmartInputDialog,
-            child: const Icon(Icons.auto_awesome),
           ),
         ],
       ),

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mind_up/main.dart';
 import 'package:mind_up/data/services/isar_service.dart';
+import 'package:mind_up/data/services/google_ai_service.dart';
 import 'package:mind_up/core/services/notification_service.dart';
 import 'package:mind_up/data/models/task.dart';
 import 'package:mockito/mockito.dart';
@@ -44,6 +45,13 @@ class MockNotificationService extends Mock implements NotificationService {
   }
 }
 
+class MockGoogleAIService extends Mock implements GoogleAIService {
+  String get apiKey => super.noSuchMethod(
+    Invocation.getter(#apiKey),
+    returnValue: '',
+  );
+}
+
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
     // Mock servislarni yaratish
@@ -60,6 +68,7 @@ void main() {
     await tester.pumpWidget(MindUpApp(
       isarService: mockIsarService,
       notificationService: mockNotificationService,
+      googleAIService: MockGoogleAIService(),
     ));
 
     // Kuting (Splash yoki loading uchun)

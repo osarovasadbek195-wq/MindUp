@@ -143,8 +143,7 @@ class _FilteredTasksScreenState extends State<FilteredTasksScreen> {
             Text('Stage: ${task.stage.name}'),
             const SizedBox(height: 8),
             Text('Reviews: ${task.reviewCount}'),
-            if (task.nextReviewDate != null)
-              Text('Next Review: ${_formatDate(task.nextReviewDate!)}'),
+            Text('Next Review: ${_formatDate(task.nextReviewDate)}'),
           ],
         ),
         actions: [
@@ -167,7 +166,7 @@ class _FilteredTasksScreenState extends State<FilteredTasksScreen> {
         builder: (context) => CustomWebView(
           url: searchUrl,
           title: 'View: ${task.title}',
-          showHelpButton: true,
+          showHelpButton: false,
         ),
       ),
     );

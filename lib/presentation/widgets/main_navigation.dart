@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/home_screen.dart';
-import '../screens/mindup_ai_screen.dart';
 import '../screens/hub_screen.dart';
+import '../screens/mindup_ai_screen.dart';
 import '../screens/add_task_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -54,7 +54,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 1),
                 _buildAddButton(),
                 _buildNavItem(Icons.school_outlined, Icons.school, 'Hub', 2),
-                _buildNavItem(Icons.smart_toy_outlined, Icons.smart_toy, 'AI', 3),
+                _buildNavItem(Icons.psychology_outlined, Icons.psychology, 'AI', 3),
               ],
             ),
           ),

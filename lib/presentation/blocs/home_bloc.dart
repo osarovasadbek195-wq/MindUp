@@ -18,12 +18,6 @@ class LoadTasks extends HomeEvent {
   LoadTasks(this.date);
 }
 
-class AddSmartTask extends HomeEvent {
-  final String prompt;
-  final String subject;
-  AddSmartTask(this.prompt, this.subject);
-}
-
 class AddTask extends HomeEvent {
   final Task task;
   AddTask(this.task);
@@ -33,6 +27,11 @@ class CompleteTask extends HomeEvent {
   final Task task;
   final bool isSuccess; // To'g'ri topdimi yoki yo'q?
   CompleteTask(this.task, this.isSuccess);
+}
+
+class AddSmartTask extends HomeEvent {
+  final String prompt;
+  AddSmartTask(this.prompt);
 }
 
 // --- States ---
@@ -60,12 +59,12 @@ class HomeError extends HomeState {
 // --- Bloc ---
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final IsarService isarService;
-  final GoogleAIService googleAIService;
+  final GoogleAIService? googleAIService;
   final NotificationService? notificationService;
 
   HomeBloc({
     required this.isarService,
-    required this.googleAIService,
+    this.googleAIService,
     this.notificationService,
   }) : super(HomeInitial()) {
     
@@ -80,43 +79,31 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     });
 
-    on<AddSmartTask>((event, emit) async {
-      final currentState = state;
-      if (currentState is HomeLoaded) {
-        emit(HomeLoading());
-        try {
-          List<Task> newTasks = [];
-          
-          // 1. AI dan vazifalarni olish
-          newTasks = await googleAIService.generateFlashcards(event.prompt, event.subject);
-          
-          // 2. Bazaga saqlash
-          await isarService.saveTasks(newTasks);
-          
-          // 3. Qayta yuklash
-          add(LoadTasks(currentState.selectedDate)); 
-        } catch (e) {
-          AppLogger.error("AI xatosi", error: e);
-          emit(HomeError("AI xatosi: $e"));
-          // Xatodan keyin qayta yuklashga urinib ko'ramiz
-          add(LoadTasks(currentState.selectedDate));
-        }
-      }
-    });
-
     on<AddTask>((event, emit) async {
-      final currentState = state;
-      if (currentState is HomeLoaded) {
-        try {
-          // Bazaga saqlash
-          await isarService.saveTask(event.task);
-          
-          // Ro'yxatni yangilash
-          add(LoadTasks(currentState.selectedDate));
-        } catch (e) {
-          AppLogger.error("Vazifani qo'shishda xatolik", error: e);
-          emit(HomeError("Vazifani qo'shishda xatolik: $e"));
+      try {
+        // Bazaga saqlash
+        await isarService.saveTask(event.task);
+
+        // Notification rejalashtirish
+        if (notificationService != null) {
+          await notificationService!.scheduleNotification(
+            event.task.id.hashCode,
+            'Flashcard Review',
+            '${event.task.title}\n${event.task.description}',
+            event.task.nextReviewDate,
+          );
         }
+        
+        // Ro'yxatni yangilash
+        final currentState = state;
+        if (currentState is HomeLoaded) {
+          add(LoadTasks(currentState.selectedDate));
+        } else {
+          add(LoadTasks(DateTime.now()));
+        }
+      } catch (e) {
+        AppLogger.error("Vazifani qo'shishda xatolik", error: e);
+        emit(HomeError("Vazifani qo'shishda xatolik: $e"));
       }
     });
 
@@ -124,7 +111,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final currentState = state;
       if (currentState is HomeLoaded) {
         try {
-          // 1. Yangi muddatni hisoblash
+          // 1. Yangi muddetni hisoblash
           final updatedTask = CascadeEngine.processReview(event.task, event.isSuccess);
           
           // 2. Bazaga saqlash
@@ -148,6 +135,44 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           AppLogger.error("Vazifani yangilashda xatolik", error: e);
           emit(HomeError("Vazifani yangilashda xatolik: $e"));
         }
+      }
+    });
+
+    on<AddSmartTask>((event, emit) async {
+      try {
+        if (googleAIService == null) {
+          emit(HomeError('AI xizmati mavjud emas'));
+          return;
+        }
+        
+        // AI dan flashcardlarni olish
+        final flashcards = await googleAIService!.generateFlashcards(event.prompt, 'General');
+        
+        // Har bir flashcardni vazifa sifatida saqlash
+        for (final task in flashcards) {
+          await isarService.saveTask(task);
+          
+          // Notification rejalashtirish
+          if (notificationService != null) {
+            await notificationService!.scheduleNotification(
+              task.id.hashCode,
+              'Flashcard Review',
+              '${task.title}\n${task.description}',
+              task.nextReviewDate,
+            );
+          }
+        }
+        
+        // Ro'yxatni yangilash
+        final currentState = state;
+        if (currentState is HomeLoaded) {
+          add(LoadTasks(currentState.selectedDate));
+        } else {
+          add(LoadTasks(DateTime.now()));
+        }
+      } catch (e) {
+        AppLogger.error("AI bilan vazifa qo'shishda xatolik", error: e);
+        emit(HomeError("AI bilan vazifa qo'shishda xatolik: $e"));
       }
     });
   }

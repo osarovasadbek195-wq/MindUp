@@ -231,16 +231,18 @@ class _HubScreenState extends State<HubScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const MindUpAIScreen(),
-            ),
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MindUpAIScreen()),
           );
         },
         backgroundColor: const Color(0xFF3B82F6),
-        child: const Icon(Icons.smart_toy, color: Colors.white),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.psychology),
+        label: const Text('MindUp AI'),
       ),
     );
   }
@@ -256,7 +258,7 @@ class _HubScreenState extends State<HubScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -373,9 +375,9 @@ class _HubScreenState extends State<HubScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -396,7 +398,7 @@ class _HubScreenState extends State<HubScreen> {
               subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: color.withOpacity(0.7),
+                color: color.withValues(alpha: 0.7),
                 fontSize: 12,
               ),
             ),
@@ -413,7 +415,7 @@ class _HubScreenState extends State<HubScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -424,9 +426,9 @@ class _HubScreenState extends State<HubScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981),
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Color(0xFF10B981),
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
               ),
@@ -457,11 +459,11 @@ class _HubScreenState extends State<HubScreen> {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.book_outlined, size: 64, color: Colors.grey),
+                    const Icon(Icons.book_outlined, size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
                     Text(
                       _getTranslation('No words added yet', 'Слова еще не добавлены', 'Hali so\'z qo\'shilmagan'),
-                      style: TextStyle(color: Colors.grey),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
@@ -506,14 +508,7 @@ class _HubScreenState extends State<HubScreen> {
         builder: (context) => CustomWebView(
           url: url,
           title: title,
-          showHelpButton: true,
-          onHelpPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const MindUpAIScreen(),
-              ),
-            );
-          },
+          showHelpButton: false,
         ),
       ),
     );

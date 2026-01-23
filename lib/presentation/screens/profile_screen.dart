@@ -450,7 +450,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: _editProfile,
             icon: const Icon(Icons.edit, color: Colors.white),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
             ),
           ),
         ],
