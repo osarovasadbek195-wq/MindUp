@@ -220,8 +220,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FC),
       appBar: AppBar(
         title: const Text('MindUp Learning'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           // Language Filter
           PopupMenuButton<String>(
@@ -230,10 +233,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               setState(() {
                 _selectedLanguage = value;
               });
-              // TODO: Implement actual filtering logic in Bloc or here
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Filter: $value (Coming Soon)')),
-              );
+              // Filter tasks immediately
+              context.read<HomeBloc>().add(LoadTasks(_selectedDay ?? DateTime.now()));
             },
             itemBuilder: (BuildContext context) {
               return _languages.map((String choice) {
@@ -316,8 +317,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ],
                     ),
                     child: TableCalendar<Task>(
-                      firstDay: DateTime.utc(2024, 1, 1),
-                      lastDay: DateTime.utc(2030, 12, 31),
+                      firstDay: const DateTime.utc(2024, 1, 1),
+                      lastDay: const DateTime.utc(2030, 12, 31),
                       focusedDay: _focusedDay,
                       calendarFormat: _calendarFormat,
                       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
