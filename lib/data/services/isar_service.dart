@@ -77,6 +77,13 @@ class IsarService {
     return profile;
   }
 
+  Future<void> saveUserProfile(UserProfile profile) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.userProfiles.put(profile);
+    });
+  }
+
   Future<void> addXP(int amount) async {
     final isar = await db;
     final profile = await getUserProfile();

@@ -2,8 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../data/models/task.dart';
 import '../../data/services/isar_service.dart';
-import '../../data/services/openai_service.dart';
+import '../../data/services/google_ai_service.dart';
 import '../../core/cascade_engine.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/utils/logger.dart';
 
 // --- Events ---
@@ -59,11 +60,13 @@ class HomeError extends HomeState {
 // --- Bloc ---
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final IsarService isarService;
-  final OpenAIService? openAIService;
+  final GoogleAIService? googleAIService;
+  final NotificationService? notificationService;
 
   HomeBloc({
     required this.isarService,
-    this.openAIService,
+    this.googleAIService,
+    this.notificationService,
   }) : super(HomeInitial()) {
     
     on<LoadTasks>((event, emit) async {
@@ -85,10 +88,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           List<Task> newTasks = [];
           
           // 1. AI dan vazifalarni olish
-          if (openAIService != null) {
-             newTasks = await openAIService!.generateTasks(event.prompt, event.subject);
+          if (googleAIService != null) {
+             newTasks = await googleAIService!.generateFlashcards(event.prompt, event.subject);
           } else {
-            throw Exception("OpenAI xizmati mavjud emas");
+            throw Exception("Google AI xizmati mavjud emas");
           }
           
           // 2. Bazaga saqlash
@@ -131,7 +134,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           // 2. Bazaga saqlash
           await isarService.saveTask(updatedTask);
           
-          // 3. Ro'yxatni yangilash
+          // 3. Keyingi review uchun notification rejalashtirish
+          // Eski notificationni bekor qilish
+          await notificationService?.cancelNotification(updatedTask.id.hashCode);
+          
+          // Yangi notification rejalashtirish
+          await notificationService?.scheduleNotification(
+            updatedTask.id.hashCode,
+            'Flashcard Review',
+            '${updatedTask.title}\n${updatedTask.description}',
+            updatedTask.nextReviewDate,
+          );
+          
+          // 4. Ro'yxatni yangilash
           add(LoadTasks(currentState.selectedDate));
         } catch (e) {
           AppLogger.error("Vazifani yangilashda xatolik", error: e);

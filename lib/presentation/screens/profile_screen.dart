@@ -7,6 +7,8 @@ import '../../data/models/user_profile.dart';
 import '../../data/services/isar_service.dart';
 import '../../data/services/import_export_service.dart';
 import '../blocs/home_bloc.dart';
+import 'edit_profile_screen.dart';
+import 'filtered_tasks_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final List<Task> allTasks;
@@ -21,10 +23,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ImportExportService? _importExportService;
   bool isExporting = false;
   bool isImporting = false;
+  UserProfile? _userProfile;
 
   ImportExportService get importExportService {
     _importExportService ??= ImportExportService(context.read<IsarService>());
     return _importExportService!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final isarService = context.read<IsarService>();
+    final profile = await isarService.getUserProfile();
+    setState(() {
+      _userProfile = profile;
+    });
+  }
+
+  Future<void> _editProfile() async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditProfileScreen(profile: _userProfile),
+      ),
+    );
+    
+    if (result != null && result is UserProfile) {
+      setState(() {
+        _userProfile = result;
+      });
+    }
   }
 
   Future<void> _handleExportJson() async {
@@ -147,11 +178,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // Stats Row
                     Row(
                       children: [
-                        _buildStatCard(context, "Mastered", masterCount.toString(), Colors.purpleAccent, Icons.workspace_premium),
+                        _buildStatCard(context, "Mastered", masterCount.toString(), Colors.purpleAccent, Icons.workspace_premium, () {
+                          _showFilteredTasks(TaskStage.mastered);
+                        }),
                         const SizedBox(width: 12),
-                        _buildStatCard(context, "Reviewing", reviewingCount.toString(), Colors.orangeAccent, Icons.loop),
+                        _buildStatCard(context, "Reviewing", reviewingCount.toString(), Colors.orangeAccent, Icons.loop, () {
+                          _showFilteredTasks(TaskStage.review);
+                        }),
                         const SizedBox(width: 12),
-                        _buildStatCard(context, "New", learningCount.toString(), Colors.blueAccent, Icons.new_releases),
+                        _buildStatCard(context, "New", learningCount.toString(), Colors.blueAccent, Icons.new_releases, () {
+                          _showFilteredTasks(TaskStage.learning);
+                        }),
                       ],
                     ),
                     
@@ -386,9 +423,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Student", // Can be dynamic if we add name editing
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  _userProfile?.name ?? "Student",
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "Level ${profile.level}",
@@ -409,6 +446,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          IconButton(
+            onPressed: _editProfile,
+            icon: const Icon(Icons.edit, color: Colors.white),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.2),
+            ),
+          ),
         ],
       ),
     );
@@ -424,30 +468,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value, Color color, IconData icon) {
+  Widget _buildStatCard(BuildContext context, String title, String value, Color color, IconData icon, VoidCallback? onTap) {
     return Expanded(
-      child: Container(
-        height: 110,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 110,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white, width: 2),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 20),
               ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
-            Text(title, style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
-          ],
+              const SizedBox(height: 8),
+              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+              Text(title, style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFilteredTasks(TaskStage stage) {
+    final filteredTasks = widget.allTasks.where((t) => t.stage == stage).toList();
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FilteredTasksScreen(
+          tasks: filteredTasks,
+          stage: stage,
         ),
       ),
     );

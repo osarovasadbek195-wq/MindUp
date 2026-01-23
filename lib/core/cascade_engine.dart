@@ -1,6 +1,9 @@
+import 'dart:math';
 import '../data/models/task.dart';
 
 class CascadeEngine {
+  static final Random _random = Random();
+  
   /// Vazifa natijasiga qarab keyingi vaqtni hisoblaydi
   /// [isSuccess] - Agar foydalanuvchi to'g'ri topsa true, xato qilsa false
   static Task processReview(Task task, bool isSuccess) {
@@ -28,37 +31,37 @@ class CascadeEngine {
         task.stage = TaskStage.mastered; // 14d, 30d, 45d, 90d
       }
 
-      // Calculate next date based on new step
+      // Calculate next date based on new step with randomization
       switch (task.repetitionStep) {
         case 0: // Should not happen on success unless logic changes, but fallback
           task.nextReviewDate = DateTime.now().add(const Duration(hours: 3));
           break;
         case 1:
-          task.nextReviewDate = DateTime.now().add(const Duration(hours: 6));
+          task.nextReviewDate = DateTime.now().add(Duration(hours: 6 + _random.nextInt(2))); // 6-7 hours
           break;
         case 2:
-          task.nextReviewDate = DateTime.now().add(const Duration(hours: 9));
+          task.nextReviewDate = DateTime.now().add(Duration(hours: 9 + _random.nextInt(3))); // 9-11 hours
           break;
         case 3:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 1));
+          task.nextReviewDate = DateTime.now().add(Duration(hours: 24 + _random.nextInt(6))); // 1-1.25 days
           break;
         case 4:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 3));
+          task.nextReviewDate = DateTime.now().add(Duration(days: 3 + _random.nextInt(2))); // 3-4 days
           break;
         case 5:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 7));
+          task.nextReviewDate = DateTime.now().add(Duration(days: 7 + _random.nextInt(3))); // 7-9 days
           break;
         case 6:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 14));
+          task.nextReviewDate = DateTime.now().add(Duration(days: 14 + _random.nextInt(4))); // 14-17 days
           break;
         case 7:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 30));
+          task.nextReviewDate = DateTime.now().add(Duration(days: 30 + _random.nextInt(7))); // 30-36 days
           break;
         case 8:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 45));
+          task.nextReviewDate = DateTime.now().add(Duration(days: 45 + _random.nextInt(10))); // 45-54 days
           break;
         case 9:
-          task.nextReviewDate = DateTime.now().add(const Duration(days: 90));
+          task.nextReviewDate = DateTime.now().add(Duration(days: 90 + _random.nextInt(15))); // 90-104 days
           break;
       }
     }

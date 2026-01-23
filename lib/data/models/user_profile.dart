@@ -6,6 +6,14 @@ part 'user_profile.g.dart';
 class UserProfile {
   Id id = Isar.autoIncrement;
 
+  String name = '';
+  
+  String email = '';
+  
+  String bio = '';
+  
+  DateTime? updatedAt;
+
   int totalXP = 0;
 
   int currentStreak = 0;

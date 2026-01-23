@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'data/services/isar_service.dart';
-import 'data/services/openai_service.dart';
+import 'data/services/google_ai_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/constants/api_constants.dart';
 import 'presentation/blocs/home_bloc.dart';
@@ -75,14 +75,14 @@ class MindUpApp extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: isarService),
         RepositoryProvider.value(value: notificationService),
-        RepositoryProvider(create: (context) => OpenAIService(apiKey: ApiConstants.openAIApiKey)),
+        RepositoryProvider(create: (context) => GoogleAIService(apiKey: ApiConstants.googleAIApiKey)),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
             create: (context) => HomeBloc(
               isarService: isarService,
-              openAIService: context.read<OpenAIService>(),
+              notificationService: notificationService,
             ),
           ),
         ],

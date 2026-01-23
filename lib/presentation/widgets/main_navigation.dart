@@ -4,9 +4,9 @@ import '../blocs/home_bloc.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
-import '../screens/copilot_screen.dart';
+import '../screens/google_ai_copilot_screen.dart';
+import '../screens/hub_screen.dart';
 import '../screens/add_task_screen.dart';
-import '../screens/video_resources_screen.dart';
 import '../../data/models/task.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -63,10 +63,10 @@ class _MainNavigationState extends State<MainNavigation> {
                _onTabTapped(0); // Go back to Home after adding
              }
           ),
-          // 3: Video Resources
-          const VideoResourcesScreen(),
-          // 4: Copilot
-          const CopilotScreen(),
+          // 3: Study Hub
+          const HubScreen(),
+          // 4: Google AI Copilot
+          const GoogleAICopilotScreen(),
           // 5: Profile / Stats
           BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
@@ -99,8 +99,8 @@ class _MainNavigationState extends State<MainNavigation> {
                 _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
                 _buildNavItem(Icons.calendar_today_outlined, Icons.calendar_today, 'Calendar', 1),
                 _buildAddButton(),
-                _buildNavItem(Icons.video_library_outlined, Icons.video_library, 'Videos', 3),
-                _buildNavItem(Icons.chat_outlined, Icons.chat, 'Copilot', 4),
+                _buildNavItem(Icons.school_outlined, Icons.school, 'Hub', 3),
+                _buildNavItem(Icons.smart_toy_outlined, Icons.smart_toy, 'AI', 4),
                 _buildNavItem(Icons.person_outline, Icons.person, 'Profile', 5),
               ],
             ),

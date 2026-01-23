@@ -5,8 +5,15 @@ import '../blocs/home_bloc.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<Task> tasks;
+  final String? selectedSubject;
+  final int maxQuestions;
 
-  const QuizScreen({super.key, required this.tasks});
+  const QuizScreen({
+    super.key, 
+    required this.tasks, 
+    this.selectedSubject,
+    this.maxQuestions = 500,
+  });
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -24,9 +31,25 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    // Filter tasks by subject if selected
+    var filteredTasks = widget.tasks;
+    if (widget.selectedSubject != null) {
+      filteredTasks = widget.tasks
+          .where((t) => t.subject == widget.selectedSubject)
+          .toList();
+    }
+    
+    // Apply limit
+    if (filteredTasks.length > widget.maxQuestions) {
+      filteredTasks = filteredTasks.take(widget.maxQuestions).toList();
+    }
+    
     // Filter tasks that have valid descriptions (answers)
-    _quizTasks = widget.tasks.where((t) => t.description != null && t.description!.isNotEmpty).toList();
+    _quizTasks = filteredTasks
+        .where((t) => t.description != null && t.description!.isNotEmpty)
+        .toList();
     _quizTasks.shuffle(); // Randomize order
+    
     if (_quizTasks.isNotEmpty) {
       _generateOptions();
     }

@@ -37,12 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               final state = context.read<HomeBloc>().state;
               if (state is HomeLoaded && state.tasks.isNotEmpty) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => QuizScreen(tasks: state.tasks),
-                  ),
-                );
+                _showSubjectSelector(state.tasks);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('No tasks available for quiz!')),
@@ -174,6 +169,60 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: Text('Initializing...'));
           },
         ),
+      ),
+    );
+  }
+
+  void _showSubjectSelector(List<Task> tasks) {
+    // Get unique subjects
+    final subjects = tasks.map((t) => t.subject).toSet().toList();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Subject'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('All Subjects'),
+                leading: const Icon(Icons.all_inclusive),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QuizScreen(tasks: tasks),
+                    ),
+                  );
+                },
+              ),
+              ...subjects.map((subject) => ListTile(
+                title: Text(subject),
+                leading: const Icon(Icons.book),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QuizScreen(
+                        tasks: tasks,
+                        selectedSubject: subject,
+                      ),
+                    ),
+                  );
+                },
+              )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
     );
   }

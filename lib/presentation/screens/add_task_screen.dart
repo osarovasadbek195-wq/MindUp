@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/task.dart';
-import '../../data/services/openai_service.dart';
+import '../../data/services/google_ai_service.dart';
 import '../../data/services/isar_service.dart';
+import '../../core/services/notification_service.dart';
 import '../blocs/home_bloc.dart';
 
 class AddTaskScreen extends StatefulWidget {
@@ -53,11 +54,22 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
         ..description = _answerController.text
         ..subject = _subjectController.text.isNotEmpty ? _subjectController.text : 'General'
         ..createdAt = DateTime.now()
-        ..nextReviewDate = DateTime.now()
-        ..repetitionStep = 0
-        ..stage = TaskStage.learning;
-
+        ..lastReviewedAt = DateTime.now();
+      task.repetitionStep = 0;
+      task.stage = TaskStage.learning;
+      task.mistakeCount = 0;
+      task.reviewCount = 0;
+      
       await context.read<IsarService>().saveTask(task);
+      
+      // Avtomatik notification rejalashtirish
+      final notificationService = context.read<NotificationService>();
+      await notificationService.scheduleNotification(
+        task.id.hashCode,
+        'Flashcard Review',
+        '${task.title}\n${task.description}',
+        task.nextReviewDate,
+      );
       
       if (!mounted) return;
       
@@ -82,17 +94,28 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
     setState(() => _isGenerating = true);
     
     // Capture services before async gap
-    final openAIService = context.read<OpenAIService>();
+    final googleAIService = context.read<GoogleAIService>();
     final isarService = context.read<IsarService>();
     final homeBloc = context.read<HomeBloc>();
     
     try {
       final subject = _aiSubjectController.text.isNotEmpty ? _aiSubjectController.text : 'General';
       
-      final tasks = await openAIService.generateTasks(_topicController.text, subject);
+      final tasks = await googleAIService.generateFlashcards(_topicController.text, subject);
       
       if (tasks.isNotEmpty) {
         await isarService.saveTasks(tasks);
+        
+        // Avtomatik notificationlarni rejalashtirish
+        final notificationService = context.read<NotificationService>();
+        for (final task in tasks) {
+          await notificationService.scheduleNotification(
+            task.id.hashCode,
+            'Flashcard Review',
+            '${task.title}\n${task.description}',
+            task.nextReviewDate,
+          );
+        }
         
         if (!mounted) return;
 

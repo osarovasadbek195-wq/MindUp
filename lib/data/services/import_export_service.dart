@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -84,7 +85,7 @@ class ImportExportService {
           tasksToImport.add(task);
         } catch (e) {
           // Skip invalid entries but continue with others
-          print('Skipping invalid task entry: $e');
+          debugPrint('Skipping invalid task entry: $e');
         }
       }
 

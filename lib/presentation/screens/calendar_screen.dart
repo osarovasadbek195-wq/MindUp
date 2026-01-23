@@ -41,6 +41,132 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  void _showInstantNotification() {
+    final notificationService = context.read<NotificationService>();
+    notificationService.showInstantNotification(
+      'MindUp Study Reminder',
+      'O\'rganganlaringizni takrorlash vaqti keldi!',
+    );
+  }
+
+  void _checkPendingNotifications() async {
+    final notificationService = context.read<NotificationService>();
+    final pendingNotifications = await notificationService.getPendingNotifications();
+    
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pending Notifications'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (pendingNotifications.isEmpty)
+                const Text('No pending notifications')
+              else
+                ...pendingNotifications.map((notif) => ListTile(
+                  title: Text(notif.title ?? 'No title'),
+                  subtitle: Text('ID: ${notif.id}\nBody: ${notif.body ?? ''}'),
+                  leading: const Icon(Icons.schedule),
+                )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTasksWithReviewTimes() async {
+    final isarService = context.read<IsarService>();
+    final allTasks = await isarService.getAllTasks();
+    
+    if (!mounted) return;
+    
+    final now = DateTime.now();
+    final upcomingTasks = allTasks
+        .where((task) => task.nextReviewDate.isAfter(now))
+        .take(10)
+        .toList();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Upcoming Review Times'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: upcomingTasks.isEmpty
+              ? const Text('No upcoming reviews')
+              : ListView.builder(
+                  itemCount: upcomingTasks.length,
+                  itemBuilder: (context, index) {
+                    final task = upcomingTasks[index];
+                    final hoursUntil = task.nextReviewDate.difference(now).inHours;
+                    final daysUntil = task.nextReviewDate.difference(now).inDays;
+                    
+                    return ListTile(
+                      title: Text(task.title),
+                      subtitle: Text(
+                        'Review in: ${daysUntil > 0 ? '$daysUntil days' : '$hoursUntil hours'}\n'
+                        'Step: ${task.repetitionStep}\n'
+                        'Date: ${task.nextReviewDate.toString().substring(0, 16)}',
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: _getStageColor(task.stage),
+                        child: Text('${task.repetitionStep}'),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+          if (upcomingTasks.isNotEmpty)
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _scheduleFlashcardNotifications(upcomingTasks.take(3).toList());
+              },
+              child: const Text('Schedule 3 Notifications'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _scheduleFlashcardNotifications(List<Task> tasks) async {
+    final notificationService = context.read<NotificationService>();
+    final flashcards = tasks.map((task) => {
+      'id': task.id.hashCode,
+      'title': 'Flashcard Review',
+      'body': '${task.title}\n${task.description}',
+      'scheduledTime': task.nextReviewDate,
+    }).toList();
+    
+    await notificationService.scheduleFlashcardNotifications(flashcards);
+    
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${flashcards.length} flashcard notifications scheduled!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
   void _showSmartInputDialog({String? initialSubject}) {
     final TextEditingController promptController = TextEditingController();
     final TextEditingController subjectController = TextEditingController(text: initialSubject);
@@ -251,10 +377,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'add_btn',
-        onPressed: _showSmartInputDialog,
-        child: const Icon(Icons.auto_awesome),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'time_btn',
+            onPressed: _showTasksWithReviewTimes,
+            backgroundColor: Colors.green,
+            mini: true,
+            child: const Icon(Icons.access_time, size: 20),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: 'check_btn',
+            onPressed: _checkPendingNotifications,
+            backgroundColor: Colors.blue,
+            mini: true,
+            child: const Icon(Icons.list, size: 20),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: 'notification_btn',
+            onPressed: _showInstantNotification,
+            backgroundColor: Colors.orange,
+            mini: true,
+            child: const Icon(Icons.notifications, size: 20),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: 'add_btn',
+            onPressed: _showSmartInputDialog,
+            child: const Icon(Icons.auto_awesome),
+          ),
+        ],
       ),
     );
   }

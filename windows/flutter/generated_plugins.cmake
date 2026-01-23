@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_windows
   flutter_inappwebview_windows
   isar_flutter_libs
   share_plus
