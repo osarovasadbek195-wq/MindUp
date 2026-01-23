@@ -228,21 +228,20 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Container(
-            padding: EdgeInsets.all(16),
+          Container(
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Color(0xFF3B82F6).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-              border: Border.all(color: Color(0xFF3B82F6).withValues(alpha: 0.3)),
+              color: const Color(0xFF3B82F6),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
             ),
             child: const Row(
               children: [
-                Icon(Icons.auto_awesome, color: Color(0xFF3B82F6)),
+                Icon(Icons.auto_awesome, color: Colors.white),
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Generate flashcards instantly from any topic using AI.',
-                    style: TextStyle(color: Color(0xFF1F2937), fontSize: 14),
+                    style: TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
               ],

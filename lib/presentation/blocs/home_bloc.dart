@@ -60,12 +60,12 @@ class HomeError extends HomeState {
 // --- Bloc ---
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final IsarService isarService;
-  final GoogleAIService? googleAIService;
+  final GoogleAIService googleAIService;
   final NotificationService? notificationService;
 
   HomeBloc({
     required this.isarService,
-    this.googleAIService,
+    required this.googleAIService,
     this.notificationService,
   }) : super(HomeInitial()) {
     
@@ -88,11 +88,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           List<Task> newTasks = [];
           
           // 1. AI dan vazifalarni olish
-          if (googleAIService != null) {
-             newTasks = await googleAIService!.generateFlashcards(event.prompt, event.subject);
-          } else {
-            throw Exception("Google AI xizmati mavjud emas");
-          }
+          newTasks = await googleAIService.generateFlashcards(event.prompt, event.subject);
           
           // 2. Bazaga saqlash
           await isarService.saveTasks(newTasks);

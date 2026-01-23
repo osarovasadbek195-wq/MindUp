@@ -82,6 +82,7 @@ class MindUpApp extends StatelessWidget {
           BlocProvider(
             create: (context) => HomeBloc(
               isarService: isarService,
+              googleAIService: context.read<GoogleAIService>(),
               notificationService: notificationService,
             ),
           ),
