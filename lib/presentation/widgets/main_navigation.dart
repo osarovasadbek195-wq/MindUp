@@ -4,7 +4,7 @@ import '../blocs/home_bloc.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
-import '../screens/google_ai_copilot_screen.dart';
+import '../screens/mindup_ai_screen.dart';
 import '../screens/hub_screen.dart';
 import '../screens/add_task_screen.dart';
 import '../../data/models/task.dart';
@@ -65,8 +65,8 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
           // 3: Study Hub
           const HubScreen(),
-          // 4: Google AI Copilot
-          const GoogleAICopilotScreen(),
+          // 4: MindUp AI
+          const MindUpAIScreen(),
           // 5: Profile / Stats
           BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {

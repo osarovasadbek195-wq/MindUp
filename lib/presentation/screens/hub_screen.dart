@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/services/isar_service.dart';
+import '../widgets/custom_webview.dart';
+import 'mindup_ai_screen.dart';
 
 class HubScreen extends StatefulWidget {
   const HubScreen({super.key});
@@ -159,6 +159,17 @@ class _HubScreenState extends State<HubScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const MindUpAIScreen(),
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF3B82F6),
+        child: const Icon(Icons.smart_toy, color: Colors.white),
+      ),
     );
   }
 
@@ -262,7 +273,7 @@ class _HubScreenState extends State<HubScreen> {
     }
     
     return GestureDetector(
-      onTap: () => _launchURL(url),
+      onTap: () => _openInAppWebView(url, title),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -393,17 +404,23 @@ class _HubScreenState extends State<HubScreen> {
     );
   }
 
-  Future<void> _launchURL(String url) async {
-    try {
-      await launchUrl(
-        Uri.parse(url),
-        mode: LaunchMode.externalApplication,
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not launch $url')),
-      );
-    }
+  void _openInAppWebView(String url, String title) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CustomWebView(
+          url: url,
+          title: title,
+          showHelpButton: true,
+          onHelpPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const MindUpAIScreen(),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   String _getTranslation(String en, String ru, String uz) {
