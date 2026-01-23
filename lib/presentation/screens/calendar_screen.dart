@@ -324,8 +324,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ],
                     ),
                     child: TableCalendar<Task>(
-                      firstDay: const DateTime.utc(2024, 1, 1),
-                      lastDay: const DateTime.utc(2030, 12, 31),
+                      firstDay: DateTime.utc(2024, 1, 1),
+                      lastDay: DateTime.utc(2030, 12, 31),
                       focusedDay: _focusedDay,
                       calendarFormat: _calendarFormat,
                       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),

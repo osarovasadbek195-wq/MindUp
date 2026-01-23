@@ -60,10 +60,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
       task.mistakeCount = 0;
       task.reviewCount = 0;
       
-      await context.read<IsarService>().saveTask(task);
+      // Services before async gap
+      final isarService = context.read<IsarService>();
+      final notificationService = context.read<NotificationService>();
+      final homeBloc = context.read<HomeBloc>();
+      
+      await isarService.saveTask(task);
       
       // Avtomatik notification rejalashtirish
-      final notificationService = context.read<NotificationService>();
       await notificationService.scheduleNotification(
         task.id.hashCode,
         'Flashcard Review',
@@ -73,10 +77,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
       
       if (!mounted) return;
       
-      context.read<HomeBloc>().add(LoadTasks(DateTime.now()));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Task added successfully!'), backgroundColor: Colors.green),
-      );
+      homeBloc.add(LoadTasks(DateTime.now()));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Task added successfully!'), backgroundColor: Colors.green),
+        );
+      }
       _questionController.clear();
       _answerController.clear();
       widget.onTaskAdded?.call();
@@ -281,21 +287,28 @@ class _AddTaskScreenState extends State<AddTaskScreen> with SingleTickerProvider
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        validator: validator,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.all(16),
       ),
     );
   }
