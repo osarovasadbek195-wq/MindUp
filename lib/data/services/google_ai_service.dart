@@ -7,7 +7,7 @@ class GoogleAIService {
   ChatSession? _chat;
   
   GoogleAIService({required String apiKey}) {
-    _model = GenerativeModel(model: 'gemini-2.0-flash', apiKey: apiKey);
+    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
     _chat = _model.startChat();
   }
   
