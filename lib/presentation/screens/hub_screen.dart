@@ -109,19 +109,31 @@ class _HubScreenState extends State<HubScreen> {
                   'icon': 'menu_book',
                   'title': _getTranslation('Reading', 'Чтение', 'O\'qish'),
                   'subtitle': _getTranslation('Academic reading', 'Академическое чтение', 'Akademik o\'qish'),
-                  'url': 'https://ieltsonlinetests.com',
+                  'url': 'https://ielts-exam.net',
                 },
                 {
                   'icon': 'edit',
                   'title': _getTranslation('Writing', 'Письмо', 'Yozish'),
                   'subtitle': _getTranslation('Task 1 & 2', 'Задание 1 и 2', '1 va 2-topshiriq'),
-                  'url': 'https://www.ieltsadvantage.com',
+                  'url': 'https://www.ielts-mentor.com',
                 },
                 {
                   'icon': 'record_voice_over',
                   'title': _getTranslation('Speaking', 'Говорение', 'Gapirish'),
                   'subtitle': _getTranslation('Speaking topics', 'Темы для говорения', 'Gapirish mavzulari'),
                   'url': 'https://ieltsliz.com',
+                },
+                {
+                  'icon': 'school',
+                  'title': _getTranslation('Strategies', 'Стратегии', 'Strategiyalar'),
+                  'subtitle': _getTranslation('Tips & tricks', 'Советы', 'Maslahatlar'),
+                  'url': 'https://www.ieltsadvantage.com',
+                },
+                {
+                  'icon': 'hearing',
+                  'title': _getTranslation('Audio Lab', 'Аудио лаб', 'Audio lab'),
+                  'subtitle': _getTranslation('Listening practice', 'Практика слушания', 'Tinglash amaliyoti'),
+                  'url': 'https://www.esl-lab.com',
                 },
               ],
             ),
@@ -135,20 +147,80 @@ class _HubScreenState extends State<HubScreen> {
                 {
                   'icon': 'calculate',
                   'title': _getTranslation('Math', 'Математика', 'Matematika'),
-                  'subtitle': _getTranslation('Full course', 'Полный курс', 'To\'liq kurs'),
-                  'url': 'https://www.khanacademy.org',
+                  'subtitle': _getTranslation('Khan Academy', 'Хан Академия', 'Khan Academy'),
+                  'url': 'https://www.khanacademy.org/sat',
                 },
                 {
                   'icon': 'description',
-                  'title': _getTranslation('Reading', 'Чтение', 'O\'qish'),
-                  'subtitle': _getTranslation('Reading strategies', 'Стратегии чтения', 'O\'qish strategiyalari'),
-                  'url': 'https://www.khanacademy.org',
+                  'title': _getTranslation('Practice', 'Практика', 'Amaliyot'),
+                  'subtitle': _getTranslation('Practice tests', 'Пробные тесты', 'Amaliy testlar'),
+                  'url': 'https://www.cracksat.net',
+                },
+                {
+                  'icon': 'school',
+                  'title': _getTranslation('Official', 'Официальный', 'Rasmiy'),
+                  'subtitle': _getTranslation('College Board', 'College Board', 'College Board'),
+                  'url': 'https://sat.collegeboard.org',
                 },
                 {
                   'icon': 'create',
-                  'title': _getTranslation('Writing', 'Письмо', 'Yozish'),
-                  'subtitle': _getTranslation('Writing section', 'Секция письма', 'Yozish bo\'limi'),
-                  'url': 'https://www.cracksat.net',
+                  'title': _getTranslation('Vocabulary', 'Словарь', 'Lug\'at'),
+                  'subtitle': _getTranslation('SAT words', 'SAT слова', 'SAT so\'zlari'),
+                  'url': 'https://www.vocabulary.com/lists/52473',
+                },
+                {
+                  'icon': 'quiz',
+                  'title': _getTranslation('Kaplan', 'Каплан', 'Kaplan'),
+                  'subtitle': _getTranslation('Free prep', 'Бесплатная подготовка', 'Bepul tayyorgarlik'),
+                  'url': 'https://www.kaptest.com/sat',
+                },
+                {
+                  'icon': 'stars',
+                  'title': _getTranslation('Princeton', 'Принстон', 'Princeton'),
+                  'subtitle': _getTranslation('Review', 'Обзор', 'Sharh'),
+                  'url': 'https://www.princetonreview.com/college/sat-test-prep',
+                },
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Video & Pronunciation Section
+            _buildSection(
+              title: '🎥 Video & Pronunciation',
+              color: const Color(0xFFF59E0B),
+              items: [
+                {
+                  'icon': 'play_circle',
+                  'title': _getTranslation('YouGlish', 'YouGlish', 'YouGlish'),
+                  'subtitle': _getTranslation('Pronunciation videos', 'Видео произношения', 'Talaffuz videolari'),
+                  'url': 'https://youglish.com',
+                },
+                {
+                  'icon': 'library_books',
+                  'title': _getTranslation('Dictionary', 'Словарь', 'Lug\'at'),
+                  'subtitle': _getTranslation('Cambridge', 'Кембридж', 'Cambridge'),
+                  'url': 'https://dictionary.cambridge.org',
+                },
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Study Tools Section
+            _buildSection(
+              title: '🛠️ Study Tools',
+              color: const Color(0xFF8B5CF6),
+              items: [
+                {
+                  'icon': 'spellcheck',
+                  'title': _getTranslation('Grammarly', 'Grammarly', 'Grammarly'),
+                  'subtitle': _getTranslation('Writing assistant', 'Помощник письма', 'Yozish yordamchisi'),
+                  'url': 'https://www.grammarly.com',
+                },
+                {
+                  'icon': 'translate',
+                  'title': _getTranslation('Translate', 'Переводчик', 'Tarjimon'),
+                  'subtitle': _getTranslation('Google Translate', 'Google Переводчик', 'Google Tarjimon'),
+                  'url': 'https://translate.google.com',
                 },
               ],
             ),
@@ -267,6 +339,30 @@ class _HubScreenState extends State<HubScreen> {
         break;
       case 'create':
         iconData = Icons.create;
+        break;
+      case 'school':
+        iconData = Icons.school;
+        break;
+      case 'hearing':
+        iconData = Icons.hearing;
+        break;
+      case 'quiz':
+        iconData = Icons.quiz;
+        break;
+      case 'stars':
+        iconData = Icons.stars;
+        break;
+      case 'play_circle':
+        iconData = Icons.play_circle;
+        break;
+      case 'library_books':
+        iconData = Icons.library_books;
+        break;
+      case 'spellcheck':
+        iconData = Icons.spellcheck;
+        break;
+      case 'translate':
+        iconData = Icons.translate;
         break;
       default:
         iconData = Icons.school;
