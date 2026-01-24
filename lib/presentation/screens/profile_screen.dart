@@ -278,6 +278,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                context.read<NotificationService>().showInstantNotification(
+                                  'MindUp Test',
+                                  'Xabarnomalar muvaffaqiyatli ishlamoqda! 🚀',
+                                );
+                              },
+                              icon: const Icon(Icons.notifications_active),
+                              label: const Text('Test Notification'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 20),
+
+                    // Notification Troubleshooting
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Text(
+                                "Xabarnomalar kelmayaptimi?",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Agar xabarnomalar kelmasa, quyidagilarni tekshiring:\n"
+                            "1. Sozlamalarda 'MindUp' uchun bildirishnomalarga ruxsat berilganligini tekshiring.\n"
+                            "2. Telefoningizda 'Battery Optimization'ni 'MindUp' uchun o'chirib qo'ying (Don't optimize).\n"
+                            "3. 'Auto-start' (Avtomatik ishga tushish) ruxsatini yoqing.",
+                            style: TextStyle(fontSize: 12, color: Colors.black87),
+                          ),
                         ],
                       ),
                     ),

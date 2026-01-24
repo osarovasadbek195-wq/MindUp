@@ -11,28 +11,98 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    // Timezone ma'lumotlarini yuklash
-    tz.initializeTimeZones();
+    try {
+      AppLogger.info('Initializing NotificationService...');
+      // Timezone ma'lumotlarini yuklash
+      tz.initializeTimeZones();
 
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
+      const InitializationSettings initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+      );
 
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        // Bildirishnoma bosilganda
-        AppLogger.info('Notification clicked: ${details.payload}');
-      },
-    );
-    
-    // Android 13+ uchun ruxsat so'rash
-    if (Platform.isAndroid) {
-      final androidImplementation = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-      await androidImplementation?.requestNotificationsPermission();
+      final bool? initialized = await flutterLocalNotificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (details) {
+          // Bildirishnoma bosilganda
+          AppLogger.info('Notification clicked: ${details.payload}');
+        },
+      );
+      
+      AppLogger.info('FlutterLocalNotificationsPlugin initialized: $initialized');
+      
+      // Kanallarni yaratish
+      await _createNotificationChannels();
+      
+      // Android 13+ uchun ruxsat so'rash
+      if (Platform.isAndroid) {
+        final androidImplementation = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        
+        // Android 13+ bildirishnoma ruxsati
+        final bool? granted = await androidImplementation?.requestNotificationsPermission();
+        AppLogger.info('Android notification permission granted: $granted');
+        
+        // Android 14+ aniq alarm ruxsati
+        if (Platform.isAndroid) {
+          final bool? exactAlarmGranted = await androidImplementation?.requestExactAlarmsPermission();
+          AppLogger.info('Android exact alarm permission granted: $exactAlarmGranted');
+        }
+      }
+    } catch (e) {
+      AppLogger.error('Error initializing NotificationService', error: e);
+    }
+  }
+
+  Future<void> _createNotificationChannels() async {
+    final androidImplementation = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      // 1. Study Reminders Channel
+      const AndroidNotificationChannel studyChannel = AndroidNotificationChannel(
+        'mindup_study_channel',
+        'Study Reminders',
+        description: 'Reminders for spaced repetition reviews',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+      );
+
+      // 2. Daily Reminders Channel
+      const AndroidNotificationChannel dailyChannel = AndroidNotificationChannel(
+        'mindup_daily_channel',
+        'Daily Reminders',
+        description: 'Daily study reminders',
+        importance: Importance.max,
+        playSound: true,
+      );
+
+      // 3. Flashcard Reviews Channel
+      const AndroidNotificationChannel flashcardChannel = AndroidNotificationChannel(
+        'mindup_flashcard_channel',
+        'Flashcard Reviews',
+        description: 'Individual flashcard review reminders',
+        importance: Importance.high,
+        playSound: true,
+      );
+
+      // 4. General Reminder Channel
+      const AndroidNotificationChannel reminderChannel = AndroidNotificationChannel(
+        'mindup_reminder_channel',
+        'General Reminders',
+        description: 'General study reminders for MindUp',
+        importance: Importance.max,
+        playSound: true,
+      );
+
+      await androidImplementation.createNotificationChannel(studyChannel);
+      await androidImplementation.createNotificationChannel(dailyChannel);
+      await androidImplementation.createNotificationChannel(flashcardChannel);
+      await androidImplementation.createNotificationChannel(reminderChannel);
+      
+      AppLogger.info('Notification channels created successfully');
     }
   }
 
@@ -72,25 +142,30 @@ class NotificationService {
 
   /// Har kuni belgilangan vaqtda eslatma qo'yish
   Future<void> scheduleDailyReminder(int id, String title, String body, TimeOfDay time) async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      _nextInstanceOfTime(time),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'mindup_daily_channel',
-          'Daily Reminders',
-          channelDescription: 'Daily study reminders',
-          importance: Importance.max,
-          priority: Priority.high,
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        _nextInstanceOfTime(time),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'mindup_daily_channel',
+            'Daily Reminders',
+            channelDescription: 'Daily study reminders',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Har kuni shu vaqtda
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Har kuni shu vaqtda
+      );
+      AppLogger.info('Daily reminder scheduled for $time');
+    } catch (e) {
+      AppLogger.error('Error scheduling daily reminder', error: e);
+    }
   }
 
   tz.TZDateTime _nextInstanceOfTime(TimeOfDay time) {
@@ -106,60 +181,67 @@ class NotificationService {
   
   /// 3 soatdan keyin notification yuborish
   Future<void> scheduleNotificationIn3Hours(int id, String title, String body) async {
-    final now = tz.TZDateTime.now(tz.local);
-    final scheduledDate = now.add(const Duration(hours: 3));
-    
-    AppLogger.info('Scheduling notification for: $scheduledDate');
-    AppLogger.info('Current time: $now');
-    
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'mindup_reminder_channel',
-          'Study Reminders',
-          channelDescription: 'Study reminders for MindUp',
-          importance: Importance.max,
-          priority: Priority.high,
+    try {
+      final now = tz.TZDateTime.now(tz.local);
+      final scheduledDate = now.add(const Duration(hours: 3));
+      
+      AppLogger.info('Scheduling notification for: $scheduledDate');
+      
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'mindup_reminder_channel',
+            'Study Reminders',
+            channelDescription: 'Study reminders for MindUp',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-    
-    // Pending notificationlarni tekshirish
-    final pendingNotifications = await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-    AppLogger.info('Pending notifications count: ${pendingNotifications.length}');
-    for (var notification in pendingNotifications) {
-      AppLogger.info('Pending: ${notification.id} - ${notification.title}');
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      
+      AppLogger.info('Notification in 3 hours scheduled successfully');
+    } catch (e) {
+      AppLogger.error('Error scheduling 3 hour notification', error: e);
     }
   }
 
   /// Aniq bir vaqtda notification rejalashtirish
   Future<void> scheduleNotification(int id, String title, String body, DateTime scheduledTime) async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'mindup_study_channel',
-          'Study Reminders',
-          channelDescription: 'Reminders for spaced repetition reviews',
-          importance: Importance.max,
-          priority: Priority.high,
+    try {
+      if (scheduledTime.isBefore(DateTime.now())) {
+        AppLogger.warning('Scheduled time $scheduledTime is in the past, scheduling for 1 minute from now');
+        scheduledTime = DateTime.now().add(const Duration(minutes: 1));
+      }
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(scheduledTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'mindup_study_channel',
+            'Study Reminders',
+            channelDescription: 'Reminders for spaced repetition reviews',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      AppLogger.info('Notification scheduled for $scheduledTime');
+    } catch (e) {
+      AppLogger.error('Error scheduling notification', error: e);
+    }
   }
 
   Future<void> cancelAll() async {
