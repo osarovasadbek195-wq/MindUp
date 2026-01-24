@@ -9,6 +9,12 @@ import 'games/memory_match_game.dart';
 import 'games/speed_recall_game.dart';
 import 'games/context_builder_game.dart';
 import 'games/true_false_blitz_game.dart';
+import 'games/sequence_master_game.dart';
+import 'games/association_chain_game.dart';
+import 'games/pattern_recall_game.dart';
+import 'games/category_sort_game.dart';
+import 'games/reverse_recall_game.dart';
+import 'games/spelling_master_game.dart';
 
 class HubScreen extends StatefulWidget {
   const HubScreen({super.key});
@@ -245,6 +251,42 @@ class _HubScreenState extends State<HubScreen> {
                   'subtitle': _getTranslation('True or False', 'Правда или Ложь', 'To\'g\'ri yoki Noto\'g\'ri'),
                   'url': 'game:blitz',
                 },
+                {
+                  'icon': 'format_list_numbered',
+                  'title': _getTranslation('Sequence', 'Последовательность', 'Ketma-ketlik'),
+                  'subtitle': _getTranslation('Order memory', 'Память на порядок', 'Tartib xotirasi'),
+                  'url': 'game:sequence',
+                },
+                {
+                  'icon': 'link',
+                  'title': _getTranslation('Chain', 'Цепочка', 'Zanjir'),
+                  'subtitle': _getTranslation('Associations', 'Ассоциации', 'Assotsiatsiyalar'),
+                  'url': 'game:chain',
+                },
+                {
+                  'icon': 'grid_view',
+                  'title': _getTranslation('Pattern', 'Узор', 'Shakl'),
+                  'subtitle': _getTranslation('Visual pattern', 'Визуальный узор', 'Vizual shakl'),
+                  'url': 'game:pattern',
+                },
+                {
+                  'icon': 'category',
+                  'title': _getTranslation('Category', 'Категория', 'Turkum'),
+                  'subtitle': _getTranslation('Sort by subject', 'Сортировка', 'Turkumlash'),
+                  'url': 'game:category',
+                },
+                {
+                  'icon': 'history',
+                  'title': _getTranslation('Reverse', 'Обратный', 'Teskari'),
+                  'subtitle': _getTranslation('Recall prompt', 'Вспомнить вопрос', 'Savolni eslash'),
+                  'url': 'game:reverse',
+                },
+                {
+                  'icon': 'spellcheck',
+                  'title': _getTranslation('Spelling', 'Правописание', 'Imlo'),
+                  'subtitle': _getTranslation('Write exactly', 'Пишите точно', 'Aniq yozing'),
+                  'url': 'game:spelling',
+                },
               ],
             ),
             const SizedBox(height: 20),
@@ -422,6 +464,21 @@ class _HubScreenState extends State<HubScreen> {
       case 'bolt':
         iconData = Icons.bolt;
         break;
+      case 'format_list_numbered':
+        iconData = Icons.format_list_numbered;
+        break;
+      case 'link':
+        iconData = Icons.link;
+        break;
+      case 'history':
+        iconData = Icons.history;
+        break;
+      case 'grid_view':
+        iconData = Icons.grid_view;
+        break;
+      case 'category':
+        iconData = Icons.category;
+        break;
       default:
         iconData = Icons.school;
     }
@@ -506,6 +563,24 @@ class _HubScreenState extends State<HubScreen> {
         break;
       case 'game:blitz':
         gameScreen = TrueFalseBlitzGame(tasks: allTasks);
+        break;
+      case 'game:sequence':
+        gameScreen = SequenceMasterGame(tasks: allTasks);
+        break;
+      case 'game:chain':
+        gameScreen = AssociationChainGame(tasks: allTasks);
+        break;
+      case 'game:pattern':
+        gameScreen = PatternRecallGame(tasks: allTasks);
+        break;
+      case 'game:category':
+        gameScreen = CategorySortGame(tasks: allTasks);
+        break;
+      case 'game:reverse':
+        gameScreen = ReverseRecallGame(tasks: allTasks);
+        break;
+      case 'game:spelling':
+        gameScreen = SpellingMasterGame(tasks: allTasks);
         break;
       default:
         return;

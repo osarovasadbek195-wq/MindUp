@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../../data/models/task.dart';
-import 'dart:math';
+import '../../../data/models/task.dart';
 
 class SpeedRecallGame extends StatefulWidget {
   final List<Task> tasks;
@@ -19,7 +19,7 @@ class _SpeedRecallGameState extends State<SpeedRecallGame> {
   int _timeLeft = 30;
   Timer? _timer;
   bool _isGameOver = false;
-  final Random _random = Random();
+  final math.Random _random = math.Random();
 
   @override
   void initState() {
@@ -70,8 +70,8 @@ class _SpeedRecallGameState extends State<SpeedRecallGame> {
       _nextQuestion();
     } else {
       setState(() {
-        _score = max(0, _score - 5);
-        _timeLeft = max(0, _timeLeft - 3); // Penalty
+        _score = math.max(0, _score - 5);
+        _timeLeft = math.max(0, _timeLeft - 3); // Penalty
       });
       _nextQuestion();
     }
@@ -110,7 +110,7 @@ class _SpeedRecallGameState extends State<SpeedRecallGame> {
             ],
           ),
           const SizedBox(height: 48),
-          const Text('WHAT IS THE MEANING OF:', style: TextStyle(color: Colors.slate400, letterSpacing: 2)),
+          const Text('WHAT IS THE MEANING OF:', style: TextStyle(color: Colors.blueGrey, letterSpacing: 2)),
           const SizedBox(height: 16),
           Text(
             _currentTask.title,
@@ -126,7 +126,7 @@ class _SpeedRecallGameState extends State<SpeedRecallGame> {
                 onPressed: () => _checkAnswer(opt),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 20),
-                  backgroundColor: Colors.slate[800],
+                  backgroundColor: Colors.blueGrey[800],
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: Text(opt, style: const TextStyle(color: Colors.white, fontSize: 18)),
@@ -166,7 +166,7 @@ class _SpeedRecallGameState extends State<SpeedRecallGame> {
             const SizedBox(height: 24),
             const Text('TIME UP!', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('Final Score: $_score', style: const TextStyle(color: Colors.slate400, fontSize: 24)),
+            Text('Final Score: $_score', style: const TextStyle(color: Colors.blueGrey, fontSize: 24)),
             const SizedBox(height: 48),
             SizedBox(
               width: double.infinity,

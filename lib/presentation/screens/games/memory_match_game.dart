@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../../data/models/task.dart';
-import 'dart:math';
+import '../../../data/models/task.dart';
 
 class MemoryMatchGame extends StatefulWidget {
   final List<Task> tasks;
@@ -29,10 +29,10 @@ class _MemoryMatchGameState extends State<MemoryMatchGame> {
   }
 
   void _setupGame() {
-    final random = Random();
+    final math.Random random = math.Random();
     // Use up to 8 pairs (16 cards)
     final gameTasks = List<Task>.from(widget.tasks)..shuffle(random);
-    final selectedTasks = gameTasks.take(min(widget.tasks.length, 8)).toList();
+    final selectedTasks = gameTasks.take(math.min(widget.tasks.length, 8)).toList();
 
     _items = [];
     for (var task in selectedTasks) {

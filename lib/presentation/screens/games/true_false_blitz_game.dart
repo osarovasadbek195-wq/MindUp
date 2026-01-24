@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../../data/models/task.dart';
-import 'dart:math';
+import '../../../data/models/task.dart';
 
 class TrueFalseBlitzGame extends StatefulWidget {
   final List<Task> tasks;
@@ -21,7 +21,7 @@ class _TrueFalseBlitzGameState extends State<TrueFalseBlitzGame> {
   int _timeLeft = 20;
   Timer? _timer;
   bool _isGameOver = false;
-  final Random _random = Random();
+  final math.Random _random = math.Random();
 
   @override
   void initState() {
@@ -69,12 +69,12 @@ class _TrueFalseBlitzGameState extends State<TrueFalseBlitzGame> {
       setState(() {
         _score += 10 + (_streak * 2);
         _streak++;
-        _timeLeft = min(20, _timeLeft + 2);
+        _timeLeft = math.min(20, _timeLeft + 2);
       });
     } else {
       setState(() {
         _streak = 0;
-        _timeLeft = max(0, _timeLeft - 3);
+        _timeLeft = math.max(0, _timeLeft - 3);
       });
     }
     _nextRound();

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../data/models/task.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -201,7 +202,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     if (!_quizStarted) {
       final availableCount = _quizTasks.length;
-      final maxSliderValue = min(availableCount, 500);
+      final maxSliderValue = math.min(availableCount, 500);
 
       return Scaffold(
         appBar: AppBar(title: const Text('Quiz Setup')),

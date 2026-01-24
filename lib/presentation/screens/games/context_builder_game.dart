@@ -1,6 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../../data/models/task.dart';
-import 'dart:math';
+import '../../../data/models/task.dart';
 
 class ContextBuilderGame extends StatefulWidget {
   final List<Task> tasks;
@@ -27,7 +27,7 @@ class _ContextBuilderGameState extends State<ContextBuilderGame> {
 
   void _nextRound() {
     if (widget.tasks.isEmpty) return;
-    final random = Random();
+    final math.Random random = math.Random();
     _currentTask = widget.tasks[random.nextInt(widget.tasks.length)];
     final answer = _currentTask.description ?? '';
     
@@ -129,9 +129,9 @@ class _ContextBuilderGameState extends State<ContextBuilderGame> {
 
   Widget _buildConstructionArea() {
     return Container(
-      minHeight: 100,
       width: double.infinity,
       padding: const EdgeInsets.all(12),
+      constraints: const BoxConstraints(minHeight: 100),
       decoration: BoxDecoration(
         color: Colors.blue[50]!.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
