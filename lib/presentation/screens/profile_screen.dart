@@ -6,6 +6,7 @@ import '../../data/models/task.dart';
 import '../../data/models/user_profile.dart';
 import '../../data/services/isar_service.dart';
 import '../../data/services/import_export_service.dart';
+import '../../core/services/notification_service.dart';
 import '../blocs/home_bloc.dart';
 import 'edit_profile_screen.dart';
 import 'filtered_tasks_screen.dart';

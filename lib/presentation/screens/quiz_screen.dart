@@ -6,13 +6,11 @@ import '../blocs/home_bloc.dart';
 class QuizScreen extends StatefulWidget {
   final List<Task> tasks;
   final String? selectedSubject;
-  final int maxQuestions;
 
   const QuizScreen({
     super.key, 
     required this.tasks, 
     this.selectedSubject,
-    this.maxQuestions = 500,
   });
 
   @override
@@ -27,11 +25,16 @@ class _QuizScreenState extends State<QuizScreen> {
   late List<Task> _quizTasks;
   late List<String> _options;
   late int _correctOptionIndex;
+  bool _quizStarted = false;
+  int _maxQuestions = 10;
 
   @override
   void initState() {
     super.initState();
-    // Filter tasks by subject if selected
+    _initializeQuizTasks();
+  }
+
+  void _initializeQuizTasks() {
     var filteredTasks = widget.tasks;
     if (widget.selectedSubject != null) {
       filteredTasks = widget.tasks
@@ -39,20 +42,26 @@ class _QuizScreenState extends State<QuizScreen> {
           .toList();
     }
     
-    // Apply limit
-    if (filteredTasks.length > widget.maxQuestions) {
-      filteredTasks = filteredTasks.take(widget.maxQuestions).toList();
-    }
-    
-    // Filter tasks that have valid descriptions (answers)
     _quizTasks = filteredTasks
         .where((t) => t.description != null && t.description!.isNotEmpty)
         .toList();
-    _quizTasks.shuffle(); // Randomize order
-    
-    if (_quizTasks.isNotEmpty) {
-      _generateOptions();
-    }
+    _quizTasks.shuffle();
+  }
+
+  void _startQuiz() {
+    setState(() {
+      if (_quizTasks.length > _maxQuestions) {
+        _quizTasks = _quizTasks.take(_maxQuestions).toList();
+      }
+      _quizStarted = true;
+      _currentIndex = 0;
+      _score = 0;
+      _isAnswered = false;
+      _selectedOptionIndex = null;
+      if (_quizTasks.isNotEmpty) {
+        _generateOptions();
+      }
+    });
   }
 
   void _generateOptions() {
@@ -182,6 +191,67 @@ class _QuizScreenState extends State<QuizScreen> {
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text('Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (!_quizStarted) {
+      final availableCount = _quizTasks.length;
+      final maxSliderValue = min(availableCount, 500);
+
+      return Scaffold(
+        appBar: AppBar(title: const Text('Quiz Setup')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.settings_suggest, size: 80, color: Colors.blue),
+                const SizedBox(height: 24),
+                const Text(
+                  'Select Question Count',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Available cards: $availableCount',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 32),
+                Slider(
+                  value: _maxQuestions.toDouble(),
+                  min: 4,
+                  max: maxSliderValue.toDouble(),
+                  divisions: maxSliderValue > 4 ? (maxSliderValue - 4) : 1,
+                  label: _maxQuestions.toString(),
+                  onChanged: (value) {
+                    setState(() {
+                      _maxQuestions = value.toInt();
+                    });
+                  },
+                ),
+                Text(
+                  '$_maxQuestions questions',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+                ),
+                const SizedBox(height: 48),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _startQuiz,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Text('START QUIZ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ],
             ),

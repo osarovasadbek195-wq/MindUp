@@ -4,6 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/services/isar_service.dart';
 import '../widgets/custom_webview.dart';
 import 'mindup_ai_screen.dart';
+import 'quiz_screen.dart';
+import 'games/memory_match_game.dart';
+import 'games/speed_recall_game.dart';
+import 'games/context_builder_game.dart';
+import 'games/true_false_blitz_game.dart';
 
 class HubScreen extends StatefulWidget {
   const HubScreen({super.key});
@@ -204,6 +209,45 @@ class _HubScreenState extends State<HubScreen> {
               ],
             ),
             const SizedBox(height: 20),
+
+            // MindUp Games Section
+            _buildSection(
+              title: '🎮 Brain Games',
+              color: const Color(0xFF10B981),
+              items: [
+                {
+                  'icon': 'quiz',
+                  'title': _getTranslation('Smart Quiz', 'Умный тест', 'Aqlli test'),
+                  'subtitle': _getTranslation('Up to 500 cards', 'До 500 карточек', '500 tagacha karta'),
+                  'url': 'game:quiz',
+                },
+                {
+                  'icon': 'extension',
+                  'title': _getTranslation('Memory Match', 'Найди пару', 'Juftini top'),
+                  'subtitle': _getTranslation('Visual memory', 'Визуальная память', 'Vizual xotira'),
+                  'url': 'game:match',
+                },
+                {
+                  'icon': 'timer',
+                  'title': _getTranslation('Speed Recall', 'Скорость', 'Tezkor eslash'),
+                  'subtitle': _getTranslation('Quick thinking', 'Быстрое мышление', 'Tezkor fikrlash'),
+                  'url': 'game:speed',
+                },
+                {
+                  'icon': 'psychology',
+                  'title': _getTranslation('Context Build', 'Контекст', 'Kontekst qurish'),
+                  'subtitle': _getTranslation('Sentence structure', 'Структура предложений', 'Gap tuzilishi'),
+                  'url': 'game:context',
+                },
+                {
+                  'icon': 'bolt',
+                  'title': _getTranslation('Blitz Mode', 'Блиц режим', 'Blits rejim'),
+                  'subtitle': _getTranslation('True or False', 'Правда или Ложь', 'To\'g\'ri yoki Noto\'g\'ri'),
+                  'url': 'game:blitz',
+                },
+              ],
+            ),
+            const SizedBox(height: 20),
             
             // Study Tools Section
             _buildSection(
@@ -366,12 +410,30 @@ class _HubScreenState extends State<HubScreen> {
       case 'translate':
         iconData = Icons.translate;
         break;
+      case 'extension':
+        iconData = Icons.extension;
+        break;
+      case 'timer':
+        iconData = Icons.timer;
+        break;
+      case 'psychology':
+        iconData = Icons.psychology;
+        break;
+      case 'bolt':
+        iconData = Icons.bolt;
+        break;
       default:
         iconData = Icons.school;
     }
     
     return GestureDetector(
-      onTap: () => _openInAppWebView(url, title),
+      onTap: () {
+        if (url.startsWith('game:')) {
+          _handleGameNavigation(url);
+        } else {
+          _openInAppWebView(url, title);
+        }
+      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -406,6 +468,53 @@ class _HubScreenState extends State<HubScreen> {
         ),
       ),
     );
+  }
+
+  void _handleGameNavigation(String gameUrl) async {
+    final isarService = context.read<IsarService>();
+    final allTasks = await isarService.getAllTasks();
+
+    if (!mounted) return;
+
+    if (allTasks.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_getTranslation(
+            'Add at least 4 cards to play games!',
+            'Добавьте минимум 4 карточки для игр!',
+            'O\'yin o\'ynash uchun kamida 4 ta karta qo\'shing!'
+          )),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    Widget gameScreen;
+    switch (gameUrl) {
+      case 'game:quiz':
+        gameScreen = QuizScreen(tasks: allTasks);
+        break;
+      case 'game:match':
+        gameScreen = MemoryMatchGame(tasks: allTasks);
+        break;
+      case 'game:speed':
+        gameScreen = SpeedRecallGame(tasks: allTasks);
+        break;
+      case 'game:context':
+        gameScreen = ContextBuilderGame(tasks: allTasks);
+        break;
+      case 'game:blitz':
+        gameScreen = TrueFalseBlitzGame(tasks: allTasks);
+        break;
+      default:
+        return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => gameScreen),
+    ).then((_) => _loadUserWords());
   }
 
   Widget _buildMyWordsSection() {
